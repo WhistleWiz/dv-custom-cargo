@@ -71,18 +71,33 @@ namespace CC.Game
                 return null;
             }
 
-            // Assign a new enum value, and increment the counter so the next one isn't the same.
-            c.Id = s_cargoV1++;
+            // Handle duplicate names.
+            string unique = "";
+            int i = 0;
 
-            if (DV.Globals.G.Types.CargoType_to_v2.TryGetValue((CargoType)c.Id, out CargoType_v2 existingCargo))
+            while (DV.Globals.G.Types.cargos.Any(x => x.id == c.Name + unique))
             {
-                CCMod.Error($"Cargo {c.Name} (ID: {c.Id}) already exists ({existingCargo.id})!");
-                return null;
+                // Name will follow this pattern:
+                // <Name>
+                // <Name> (1)
+                // <Name> (2)
+                // ...
+                unique = $" ({++i})";
             }
 
+            if (i > 0)
+            {
+                CCMod.Error($"Cargo with name '{c.Name}' already exists! Renaming to '{c.Name + unique}'.");
+                c.Name += unique;
+            }
+
+            // Assign a new enum value, and increment the counter so the next one isn't the same.
+            c.Id = s_cargoV1++;
             CargoType_v2 v2 = CargoInjector.ToV2(c);
             DV.Globals.G.Types.cargos.Add(v2);
             AddedValues.Add(v2.v1);
+
+            AddTranslations(v2);
 
             return v2;
         }

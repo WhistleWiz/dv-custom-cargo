@@ -1,8 +1,11 @@
-﻿namespace CC.Common
+﻿using Newtonsoft.Json;
+
+namespace CC.Common
 {
     public class CustomCargo
     {
         public string Name = "MyCargoName";
+        [JsonIgnore]
         public int Id = 10000;
         public float MassPerUnit = 1000.0f;
         public float FullDamagePrice = 10000.0f;
