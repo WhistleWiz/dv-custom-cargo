@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DVLangHelper.Data;
+using Newtonsoft.Json;
 
 namespace CC.Common
 {
@@ -12,7 +13,9 @@ namespace CC.Common
         public float EnvironmentDamagePrice = 0.0f;
         public BaseGameLicense[] Licenses = new[] { BaseGameLicense.Basic };
 
-        public CargoTranslation[] CargoTranslations = new CargoTranslation[0];
+        public string? Csv;
+        public TranslationData? TranslationDataFull;
+        public TranslationData? TranslationDataShort;
 
         public string[] SourceStations = new string[0];
         public string[] DestinationStations = new string[0];

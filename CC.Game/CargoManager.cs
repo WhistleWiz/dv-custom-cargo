@@ -1,5 +1,6 @@
 ﻿using CC.Common;
 using DV.ThingTypes;
+using DVLangHelper.Data;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -71,63 +72,62 @@ namespace CC.Game
                 return null;
             }
 
-            // Handle duplicate names.
-            string unique = "";
-            int i = 0;
-
-            while (DV.Globals.G.Types.cargos.Any(x => x.id == c.Name + unique))
+            // Handle duplicate names (not).
+            if (DV.Globals.G.Types.cargos.Any(x => x.id == c.Name))
             {
-                // Name will follow this pattern:
-                // <Name>
-                // <Name> (1)
-                // <Name> (2)
-                // ...
-                unique = $" ({++i})";
-            }
-
-            if (i > 0)
-            {
-                CCMod.Error($"Cargo with name '{c.Name}' already exists! Renaming to '{c.Name + unique}'.");
-                c.Name += unique;
+                CCMod.Error($"Cargo with name '{c.Name}' already exists!");
+                return null;
             }
 
             // Assign a new enum value, and increment the counter so the next one isn't the same.
             c.Id = s_cargoV1++;
+
+            // Convert into actual cargo and add it.
             CargoType_v2 v2 = CargoInjector.ToV2(c);
             DV.Globals.G.Types.cargos.Add(v2);
+
+            // Cache the new enum so it can be patched in.
             AddedValues.Add(v2.v1);
-            AddTranslations(c, unique);
+
+            // Add translations for this cargo.
+            AddTranslations(c);
 
             return v2;
         }
 
-        private static void AddTranslations(CustomCargo cargo, string unique)
+        private static void AddTranslations(CustomCargo cargo)
         {
-            // If there are no translations, use the name as default.
-            if (cargo.CargoTranslations.Length == 0)
+            if (!string.IsNullOrEmpty(cargo.Csv))
             {
-                CCMod.Translations.AddTranslation(
-                    cargo.LocalizationKeyFull,
-                    DVLangHelper.Data.DVLanguage.English,
-                    cargo.Name + unique);
-                CCMod.Translations.AddTranslation(
-                    cargo.LocalizationKeyShort,
-                    DVLangHelper.Data.DVLanguage.English,
-                    cargo.Name + unique);
-
+                CCMod.Translations.AddTranslationsFromWebCsv(cargo.Csv!);
                 return;
             }
 
-            foreach (var translation in cargo.CargoTranslations)
+            // If there are no translations, use the name as default.
+            if (cargo.TranslationDataFull == null)
             {
-                CCMod.Translations.AddTranslation(
+                CCMod.Translations.AddTranslations(
                     cargo.LocalizationKeyFull,
-                    translation.Language,
-                    translation.Full + unique);
-                CCMod.Translations.AddTranslation(
+                    TranslationData.Default(cargo.Name));
+            }
+            else
+            {
+                CCMod.Translations.AddTranslations(
+                    cargo.LocalizationKeyFull,
+                    cargo.TranslationDataFull);
+            }
+
+            if (cargo.TranslationDataShort == null)
+            {
+                CCMod.Translations.AddTranslations(
                     cargo.LocalizationKeyShort,
-                    translation.Language,
-                    translation.Short + unique);
+                    TranslationData.Default(cargo.Name));
+            }
+            else
+            {
+                CCMod.Translations.AddTranslations(
+                    cargo.LocalizationKeyShort,
+                    cargo.TranslationDataShort);
             }
         }
     }

@@ -11,7 +11,7 @@ namespace CC.Game
         public static UnityModManager.ModEntry Instance { get; private set; } = null!;
         public static TranslationInjector Translations { get; private set; } = null!;
 
-        // Unity Mod Manage Wiki: https://wiki.nexusmods.com/index.php/Category:Unity_Mod_Manager
+        // Unity Mod Manager Wiki: https://wiki.nexusmods.com/index.php/Category:Unity_Mod_Manager
         private static bool Load(UnityModManager.ModEntry modEntry)
         {
             Instance = modEntry;
@@ -49,6 +49,11 @@ namespace CC.Game
 		{
 			Instance.Logger.Log(message);
 		}
+
+        public static void Warning(string message)
+        {
+            Instance.Logger.Warning(message);
+        }
 
         public static void Error(string message)
         {
