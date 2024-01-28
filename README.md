@@ -36,8 +36,4 @@ TODO: instruction on how to use it.
 ## License
 
 Source code is distributed under the MIT license.
-See [LICENSE][license-url] for more information.
-[license-shield]: https://img.shields.io/github/license/derail-valley-modding/template-umm.svg?style=for-the-badge
-[license-url]: https://github.com/derail-valley-modding/template-umm/blob/main/LICENSE
-[references-url]: https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2022
-[autocrlf-url]: https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_formatting_and_whitespace
+See <a href="https://github.com/WhistleWiz/dv-custom-cargo/blob/main/LICENSE">[LICENSE]</a> for more information.
