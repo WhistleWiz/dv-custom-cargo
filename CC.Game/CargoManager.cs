@@ -96,22 +96,39 @@ namespace CC.Game
             CargoType_v2 v2 = CargoInjector.ToV2(c);
             DV.Globals.G.Types.cargos.Add(v2);
             AddedValues.Add(v2.v1);
-
-            AddTranslations(v2);
+            AddTranslations(c, unique);
 
             return v2;
         }
 
-        private static void AddTranslations(CargoType_v2 cargo)
+        private static void AddTranslations(CustomCargo cargo, string unique)
         {
-            CCMod.Translations.AddTranslation(
-                cargo.localizationKeyFull,
-                DVLangHelper.Data.DVLanguage.English,
-                cargo.id);
-            CCMod.Translations.AddTranslation(
-                cargo.localizationKeyShort,
-                DVLangHelper.Data.DVLanguage.English,
-                cargo.id);
+            // If there are no translations, use the name as default.
+            if (cargo.CargoTranslations.Length == 0)
+            {
+                CCMod.Translations.AddTranslation(
+                    cargo.LocalizationKeyFull,
+                    DVLangHelper.Data.DVLanguage.English,
+                    cargo.Name + unique);
+                CCMod.Translations.AddTranslation(
+                    cargo.LocalizationKeyShort,
+                    DVLangHelper.Data.DVLanguage.English,
+                    cargo.Name + unique);
+
+                return;
+            }
+
+            foreach (var translation in cargo.CargoTranslations)
+            {
+                CCMod.Translations.AddTranslation(
+                    cargo.LocalizationKeyFull,
+                    translation.Language,
+                    translation.Full + unique);
+                CCMod.Translations.AddTranslation(
+                    cargo.LocalizationKeyShort,
+                    translation.Language,
+                    translation.Short + unique);
+            }
         }
     }
 }
