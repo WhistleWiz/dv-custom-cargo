@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityModManagerNet;
 
 namespace CC.Game
@@ -43,17 +44,7 @@ namespace CC.Game
 
                 if (customCargo != null)
                 {
-                    AddedValues.Add(customCargo.v1);
                     newCargos.Add(customCargo);
-
-                    CCMod.Translations.AddTranslation(
-                        customCargo.localizationKeyFull,
-                        DVLangHelper.Data.DVLanguage.English,
-                        customCargo.id);
-                    CCMod.Translations.AddTranslation(
-                        customCargo.localizationKeyShort,
-                        DVLangHelper.Data.DVLanguage.English,
-                        customCargo.id);
                 }
             }
 
@@ -80,19 +71,32 @@ namespace CC.Game
                 return null;
             }
 
+            // Assign a new enum value, and increment the counter so the next one isn't the same.
+            c.Id = s_cargoV1++;
+
             if (DV.Globals.G.Types.CargoType_to_v2.TryGetValue((CargoType)c.Id, out CargoType_v2 existingCargo))
             {
                 CCMod.Error($"Cargo {c.Name} (ID: {c.Id}) already exists ({existingCargo.id})!");
                 return null;
             }
 
-            // Assign a new enum value, and increment the counter so the next one isn't the same.
-            c.Id = s_cargoV1++;
             CargoType_v2 v2 = CargoInjector.ToV2(c);
-
             DV.Globals.G.Types.cargos.Add(v2);
+            AddedValues.Add(v2.v1);
 
             return v2;
+        }
+
+        private static void AddTranslations(CargoType_v2 cargo)
+        {
+            CCMod.Translations.AddTranslation(
+                cargo.localizationKeyFull,
+                DVLangHelper.Data.DVLanguage.English,
+                cargo.id);
+            CCMod.Translations.AddTranslation(
+                cargo.localizationKeyShort,
+                DVLangHelper.Data.DVLanguage.English,
+                cargo.id);
         }
     }
 }

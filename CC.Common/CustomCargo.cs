@@ -4,8 +4,6 @@
     {
         public string Name = "MyCargoName";
         public int Id = 10000;
-        public string LocalizationKeyFull = "mycargonamefull";
-        public string LocalizationKeyShort = "mycargonameshort";
         public float MassPerUnit = 1000.0f;
         public float FullDamagePrice = 10000.0f;
         public float EnvironmentDamagePrice = 0.0f;
@@ -17,6 +15,9 @@
         public CargoGroup[] CargoGroups = new CargoGroup[0];
 
         public string Author = string.Empty;
+
+        public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}";
+        public string LocalizationKeyShort => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}_short";
 
         public CargoGroup GetDefaultCargoGroup()
         {

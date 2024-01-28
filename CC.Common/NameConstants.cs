@@ -9,6 +9,6 @@
         public const string MainModId = "DVCustomCargo";
         public const string ModIdPrefix = "CC_";
 
-        public const string LocalizeRoot = "customcargo/";
+        public const string LocalizeRoot = "customcargo";
     }
 }

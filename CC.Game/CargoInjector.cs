@@ -16,11 +16,14 @@ namespace CC.Game
 
             newCargo.id = cargo.Name;
             newCargo.v1 = (CargoType)cargo.Id;
-            newCargo.localizationKeyFull = NameConstants.LocalizeRoot + cargo.LocalizationKeyFull;
-            newCargo.localizationKeyShort = NameConstants.LocalizeRoot + cargo.LocalizationKeyShort;
+
+            newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
+            newCargo.localizationKeyShort = cargo.LocalizationKeyShort;
+
             newCargo.massPerUnit = cargo.MassPerUnit;
             newCargo.fullDamagePrice = cargo.FullDamagePrice;
             newCargo.environmentDamagePrice = cargo.EnvironmentDamagePrice;
+
             newCargo.requiredJobLicenses = cargo.Licenses.Select(x => ((JobLicenses)x).ToV2()).ToArray();
             newCargo.loadableCarTypes = Array.Empty<CargoType_v2.LoadableInfo>();
 
