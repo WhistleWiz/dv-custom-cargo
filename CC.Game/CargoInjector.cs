@@ -22,7 +22,7 @@ namespace CC.Game
             {
                 if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(source, out var station))
                 {
-                    CCMod.Error($"Could not find source station '{source}' for cargo '{cargo.Name}' " +
+                    CCMod.Warning($"Could not find source station '{source}' for cargo '{cargo.Name}' " +
                         $"(is vanilla: {Helper.IsVanillaStation(source)})!");
                     continue;
                 }
@@ -34,12 +34,24 @@ namespace CC.Game
             {
                 if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(destination, out var station))
                 {
-                    CCMod.Error($"Could not find destination station '{destination}' for cargo '{cargo.Name}' " +
+                    CCMod.Warning($"Could not find destination station '{destination}' for cargo '{cargo.Name}' " +
                         $"(is vanilla: {Helper.IsVanillaStation(destination)})!");
                     continue;
                 }
 
                 destStations.Add(station);
+            }
+
+            if (srcStations.Count == 0)
+            {
+                CCMod.Error("Cargo has no source stations! Skipping injection...");
+                return;
+            }
+
+            if (destStations.Count == 0)
+            {
+                CCMod.Error("Cargo has no destination stations! Skipping injection...");
+                return;
             }
 
             foreach (var station in srcStations)
