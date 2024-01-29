@@ -20,16 +20,16 @@ namespace CC.Common
         public string[] SourceStations = new string[0];
         public string[] DestinationStations = new string[0];
 
-        public CargoGroup[] CargoGroups = new CargoGroup[0];
+        public CustomCargoGroup[] CargoGroups = new CustomCargoGroup[0];
 
         public string Author = string.Empty;
 
         public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}";
         public string LocalizationKeyShort => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}_short";
 
-        public CargoGroup GetDefaultCargoGroup()
+        public CustomCargoGroup GetDefaultCargoGroup()
         {
-            return new CargoGroup(Name);
+            return new CustomCargoGroup(Name);
         }
     }
 }

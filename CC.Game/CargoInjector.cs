@@ -2,7 +2,10 @@
 using DV.Logic.Job;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
+using DV.Utils;
+using Mono.Cecil;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -10,24 +13,58 @@ namespace CC.Game
 {
     internal static class CargoInjector
     {
-        public static CargoType_v2 ToV2(this CustomCargo cargo)
+        public static void InjectRoutes(CustomCargo cargo)
         {
-            var newCargo = ScriptableObject.CreateInstance<CargoType_v2>();
+            var srcStations = new List<StationController>();
+            var destStations = new List<StationController>();
 
-            newCargo.id = cargo.Name;
-            newCargo.v1 = (CargoType)cargo.Id;
+            foreach (var source in cargo.SourceStations)
+            {
+                if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(source, out var station))
+                {
+                    CCMod.Error($"Could not find source station '{source}' for cargo '{cargo.Name}' " +
+                        $"(is vanilla: {Helper.IsVanillaStation(source)})!");
+                    continue;
+                }
 
-            newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
-            newCargo.localizationKeyShort = cargo.LocalizationKeyShort;
+                srcStations.Add(station);
+            }
 
-            newCargo.massPerUnit = cargo.MassPerUnit;
-            newCargo.fullDamagePrice = cargo.FullDamagePrice;
-            newCargo.environmentDamagePrice = cargo.EnvironmentDamagePrice;
+            foreach (var destination in cargo.DestinationStations)
+            {
+                if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(destination, out var station))
+                {
+                    CCMod.Error($"Could not find destination station '{destination}' for cargo '{cargo.Name}' " +
+                        $"(is vanilla: {Helper.IsVanillaStation(destination)})!");
+                    continue;
+                }
 
-            newCargo.requiredJobLicenses = cargo.Licenses.Select(x => ((JobLicenses)x).ToV2()).ToArray();
-            newCargo.loadableCarTypes = Array.Empty<CargoType_v2.LoadableInfo>();
+                destStations.Add(station);
+            }
 
-            return newCargo;
+            foreach (var station in srcStations)
+            {
+                foreach (var group in cargo.CargoGroups)
+                {
+                    station.proceduralJobsRuleset.outputCargoGroups.Add(new CargoGroup(
+                        CargoManager.ToCargoTypeGroup(group, cargo.Name),
+                        destStations));
+                }
+
+                AddCargoToWarehouse(station, cargo);
+            }
+
+            foreach (var station in destStations)
+            {
+                foreach (var group in cargo.CargoGroups)
+                {
+                    station.proceduralJobsRuleset.inputCargoGroups.Add(new CargoGroup(
+                        CargoManager.ToCargoTypeGroup(group, cargo.Name),
+                        srcStations));
+                }
+
+                AddCargoToWarehouse(station, cargo);
+            }
         }
 
         private static void AddCargoToWarehouse(StationController station, CustomCargo cargo)

@@ -1,10 +1,10 @@
 ﻿namespace CC.Common
 {
-    public class CargoGroup
+    public class CustomCargoGroup
     {
         public string[] CargosIds;
 
-        public CargoGroup(params string[] cargos)
+        public CustomCargoGroup(params string[] cargos)
         {
             CargosIds = cargos;
         }
