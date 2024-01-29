@@ -93,7 +93,7 @@ namespace CC.Game
             }
 
             // Convert into actual cargo and add it.
-            v2 = CargoManager.ToV2(c);
+            v2 = c.ToV2();
             Globals.G.Types.cargos.Add(v2);
 
             // Cache the new enum so it can be patched in,
@@ -103,6 +103,9 @@ namespace CC.Game
 
             // Add translations for this cargo.
             AddTranslations(c);
+
+            // Add vanilla types to loadable info.
+            AddLoadableInfo(c, v2);
 
             return true;
         }
@@ -143,22 +146,17 @@ namespace CC.Game
             }
         }
 
-        public static List<CargoType> ToCargoTypeGroup(CustomCargoGroup group, string cargoName)
+        private static void AddLoadableInfo(CustomCargo cargo, CargoType_v2 v2)
         {
-            List<CargoType> types = new List<CargoType>();
+            List<CargoType_v2.LoadableInfo> loadables = v2.loadableCarTypes.ToList();
 
-            foreach (var item in group.CargosIds)
+            foreach (var item in cargo.VanillaTypesToLoad)
             {
-                if (!Globals.G.Types.cargos.TryFind(x => x.id == item, out var cargo))
-                {
-                    CCMod.Error($"Cargo '{item}' is missing (cargo group for '{cargoName}')");
-                    continue;
-                }
-
-                types.Add(cargo.v1);
+                // Support for models comes in later.
+                loadables.Add(new CargoType_v2.LoadableInfo(item.ToV2(), new GameObject[0]));
             }
 
-            return types;
+            v2.loadableCarTypes = loadables.ToArray();
         }
 
         public static CargoType_v2 ToV2(this CustomCargo cargo)
@@ -179,6 +177,24 @@ namespace CC.Game
             newCargo.loadableCarTypes = Array.Empty<CargoType_v2.LoadableInfo>();
 
             return newCargo;
+        }
+
+        public static List<CargoType> ToCargoTypeGroup(this CustomCargoGroup group, string cargoName)
+        {
+            List<CargoType> types = new List<CargoType>();
+
+            foreach (var item in group.CargosIds)
+            {
+                if (!Globals.G.Types.cargos.TryFind(x => x.id == item, out var cargo))
+                {
+                    CCMod.Error($"Cargo '{item}' is missing (cargo group for '{cargoName}')");
+                    continue;
+                }
+
+                types.Add(cargo.v1);
+            }
+
+            return types;
         }
     }
 }

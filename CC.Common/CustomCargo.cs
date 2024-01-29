@@ -22,6 +22,8 @@ namespace CC.Common
 
         public CustomCargoGroup[] CargoGroups = new CustomCargoGroup[0];
 
+        public CarParentType[] VanillaTypesToLoad = new CarParentType[0];
+
         public string Author = string.Empty;
 
         public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}";

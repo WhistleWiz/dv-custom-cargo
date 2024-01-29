@@ -1,23 +1,27 @@
-﻿using DV.Utils;
+﻿using DV.Logic.Job;
+using DV.Utils;
 using HarmonyLib;
 
 namespace CC.Game
 {
-    [HarmonyPatch(typeof(StationProceduralJobsController))]
-    internal static class StationProceduralJobsControllerPatches
+    [HarmonyPatch(typeof(JobsManager))]
+    internal static class JobsManagerPatches
     {
         private static bool s_hasRun = false;
 
-        static StationProceduralJobsControllerPatches()
+        static JobsManagerPatches()
         {
             // So every time a save is loaded we can make sure
             // the patch is run again.
             UnloadWatcher.UnloadRequested += () => s_hasRun = false;
         }
 
-        [HarmonyPatch(nameof(StationProceduralJobsController.TryToGenerateJobs))]
-        [HarmonyPrefix]
-        public static void TryToGenerateJobsPrefix()
+        // JobsManager doesn't actually have Awake(), however this one
+        // is called within Awake() of the base class (SingletonBehaviour),
+        // which ends up being effectively the same thing.
+        [HarmonyPatch(nameof(JobsManager.AllowAutoCreate))]
+        [HarmonyPostfix]
+        public static void AllowAutoCreatePostfix()
         {
             // Only run once per load.
             if (s_hasRun)
