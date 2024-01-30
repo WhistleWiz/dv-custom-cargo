@@ -111,7 +111,7 @@ namespace CC.Game
             AddTranslations(c);
 
             // Try to load any asset bundle with models.
-            TryLoadModels(jsonPath, v2.v1, out var models);
+            TryLoadModels(jsonPath, out var models);
 
             // Add vanilla types to loadable info.
             AddLoadableInfo(c, v2, models);
@@ -119,13 +119,13 @@ namespace CC.Game
             return true;
         }
 
-        private static bool TryLoadModels(string jsonPath, CargoType cargo, out ModelsForVanillaCar[] models)
+        private static bool TryLoadModels(string jsonPath, out ModelsForVanillaCar[] models)
         {
-            var assetBundlePath = Path.Combine(jsonPath, NameConstants.ModelBundle);
+            var assetBundlePath = Path.Combine(Path.GetDirectoryName(jsonPath), NameConstants.ModelBundle);
 
             if (!File.Exists(assetBundlePath))
             {
-                CCMod.Log($"No model bundle found.");
+                CCMod.Log($"No model bundle found (expected {assetBundlePath}).");
                 models = null!;
                 return false;
             }
@@ -155,6 +155,8 @@ namespace CC.Game
                     // the proxy system on custom cargo.
                 }
             }
+
+            assetBundle.Unload(false);
 
             return true;
         }

@@ -7,7 +7,7 @@ namespace CC.Common
 {
     public class ZipUtility
     {
-        public static void WriteToZip(CustomCargo c, string path)
+        public static void WriteToZip(CustomCargo c, string path, params string[] extraFilePaths)
         {
             // Use a memory stream so we can write multiple files into
             // a single zip without writing to disk before.
@@ -41,6 +41,12 @@ namespace CC.Common
                     using (var jsonWr = new JsonTextWriter(streamWriter))
                     {
                         serializer.Serialize(jsonWr, c);
+                    }
+
+                    // Include extra files into the zip.
+                    foreach (var item in extraFilePaths)
+                    {
+                        file = archive.CreateEntryFromFile(item, Path.Combine(fileName, Path.GetFileName(item)));
                     }
                 }
 

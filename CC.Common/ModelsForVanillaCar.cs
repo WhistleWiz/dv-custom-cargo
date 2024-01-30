@@ -2,6 +2,7 @@
 
 namespace CC.Common
 {
+    [CreateAssetMenu(menuName = "DVCustomCargo/Model Collection")]
     public class ModelsForVanillaCar : ScriptableObject
     {
         public CarParentType CarType;

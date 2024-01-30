@@ -6,11 +6,12 @@
 		<LangVersion>8</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\CC.Common\CC.Common.csproj" />
+		<ProjectReference Include="..\CC.Common\CC.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="UnityEngine" />
+		<Reference Include="UnityEngine.AssetBundleModule" />
 		<Reference Include="UnityEngine.CoreModule" />
 		<Reference Include="UnityEngine.IMGUIModule" />
 		<Reference Include="UnityEditor" />
