@@ -5,6 +5,7 @@
         // Files.
         public const string ModInfo = "Info.json";
         public const string CargoFile = "cargo.json";
+        public const string ModelBundle = "models_bundle";
 
         // Mods.
         public const string LangHelper = "DVLangHelper";

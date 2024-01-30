@@ -110,8 +110,51 @@ namespace CC.Game
             // Add translations for this cargo.
             AddTranslations(c);
 
+            // Try to load any asset bundle with models.
+            TryLoadModels(jsonPath, v2.v1, out var models);
+
             // Add vanilla types to loadable info.
-            AddLoadableInfo(c, v2);
+            AddLoadableInfo(c, v2, models);
+
+            return true;
+        }
+
+        private static bool TryLoadModels(string jsonPath, CargoType cargo, out ModelsForVanillaCar[] models)
+        {
+            var assetBundlePath = Path.Combine(jsonPath, NameConstants.ModelBundle);
+
+            if (!File.Exists(assetBundlePath))
+            {
+                CCMod.Log($"No model bundle found.");
+                models = null!;
+                return false;
+            }
+
+            CCMod.Log($"Loading model bundle...");
+            var assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+
+            if (assetBundle == null)
+            {
+                CCMod.Error($"Failed to load model bundle!");
+                models = null!;
+                return false;
+            }
+
+            models = assetBundle.LoadAllAssets<ModelsForVanillaCar>();
+
+            if (models.Length == 0)
+            {
+                CCMod.Error($"No models found in the bundle!");
+            }
+
+            foreach (var item in models)
+            {
+                foreach (var prefab in item.Prefabs)
+                {
+                    // Ask CCL to handle some model loading here, so we can support
+                    // the proxy system on custom cargo.
+                }
+            }
 
             return true;
         }
@@ -152,14 +195,35 @@ namespace CC.Game
             }
         }
 
-        private static void AddLoadableInfo(CustomCargo cargo, CargoType_v2 v2)
+        private static void AddLoadableInfo(CustomCargo cargo, CargoType_v2 v2, ModelsForVanillaCar[] models)
         {
             List<CargoType_v2.LoadableInfo> loadables = v2.loadableCarTypes.ToList();
 
             foreach (var item in cargo.VanillaTypesToLoad)
             {
-                // Support for models comes in later.
-                loadables.Add(new CargoType_v2.LoadableInfo(item.ToV2(), new GameObject[0]));
+                GameObject[] prefabs;
+
+                // No models to assign.
+                if (models == null || models.Length == 0)
+                {
+                    prefabs = new GameObject[0];
+                }
+                else
+                {
+                    var first = models.FirstOrDefault(x => x.CarType == item);
+
+                    // No models for this car type.
+                    if (first == default)
+                    {
+                        prefabs = new GameObject[0];
+                    }
+                    else
+                    {
+                        prefabs = first.Prefabs;
+                    }
+                }
+
+                loadables.Add(new CargoType_v2.LoadableInfo(item.ToV2(), prefabs));
             }
 
             v2.loadableCarTypes = loadables.ToArray();
