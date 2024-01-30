@@ -1,9 +1,6 @@
 ﻿using CC.Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
-using System.IO.Compression;
 
 namespace CC.Creator
 {
@@ -54,7 +51,7 @@ namespace CC.Creator
             c.Author = Console.ReadLine();
 
             Console.WriteLine("\n\n\nPreparing zip...");
-            WriteToZip(c);
+            ZipUtility.WriteToZip(c, s_exportPath);
             Console.WriteLine($"Success! Your mod has been created at {s_exportPath}");
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
@@ -78,65 +75,6 @@ namespace CC.Creator
             }
 
             return f;
-        }
-
-        private static void WriteToZip(CustomCargo c)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                var fileName = GetFullModId(c);
-
-                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Formatting = Formatting.Indented;
-
-                    var file = archive.CreateEntry(Path.Combine(fileName, NameConstants.ModInfo));
-
-                    using (var entryStream = file.Open())
-                    using (var streamWriter = new StreamWriter(entryStream))
-                    using (var jsonWr = new JsonTextWriter(streamWriter))
-                    {
-                        serializer.Serialize(jsonWr, GetModInfo(c));
-                    }
-
-                    file = archive.CreateEntry(Path.Combine(fileName, NameConstants.CargoFile));
-
-                    using (var entryStream = file.Open())
-                    using (var streamWriter = new StreamWriter(entryStream))
-                    using (var jsonWr = new JsonTextWriter(streamWriter))
-                    {
-                        serializer.Serialize(jsonWr, c);
-                    }
-                }
-
-                var outputPath = Path.Combine(s_exportPath,
-                    $"{fileName}.zip");
-
-                using (var fileStream = new FileStream(outputPath, FileMode.Create))
-                {
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-                    memoryStream.CopyTo(fileStream);
-                }
-            }
-        }
-
-        private static string GetFullModId(CustomCargo c)
-        {
-            return $"{NameConstants.ModIdPrefix}{c.Name.Replace(" ", "")}";
-        }
-
-        private static JObject GetModInfo(CustomCargo c)
-        {
-            return new JObject
-            {
-                { "Id", GetFullModId(c) },
-                { "DisplayName", $"Custom Cargo {c.Name}" },
-                { "Version", "1.0.0" },
-                { "Author", c.Author },
-                { "ManagerVersion", "0.27.3" },
-                { "Requirements", JToken.FromObject(new[] { NameConstants.MainModId }) },
-            };
         }
     }
 }

@@ -8,6 +8,7 @@ namespace CC.Game
 	public static class CCMod
     {
         public const string Guid = "wiz.customcargo";
+
         public static UnityModManager.ModEntry Instance { get; private set; } = null!;
         public static TranslationInjector Translations { get; private set; } = null!;
 
@@ -28,6 +29,7 @@ namespace CC.Game
 
 		private static void ScanMods()
 		{
+            // Scan mods loaded before for cargo.
             foreach (var mod in UnityModManager.modEntries)
             {
                 if (mod.Active)
@@ -39,6 +41,7 @@ namespace CC.Game
 
         private static void HandleModToggled(UnityModManager.ModEntry modEntry, bool newState)
         {
+            // For each new loaded mod, check for cargo.
             if (newState)
             {
                 CargoManager.LoadCargos(modEntry);

@@ -25,6 +25,7 @@ namespace CC.Common
         public CarParentType[] VanillaTypesToLoad = new CarParentType[0];
 
         public string Author = string.Empty;
+        public string Version = "1.0.0";
 
         public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}";
         public string LocalizationKeyShort => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}_short";

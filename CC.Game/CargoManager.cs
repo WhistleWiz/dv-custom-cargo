@@ -29,6 +29,7 @@ namespace CC.Game
         {
             List<CargoType_v2> newCargos = new List<CargoType_v2>();
 
+            // Find the 'cargo.json' files.
             foreach (string jsonPath in Directory.EnumerateFiles(mod.Path, NameConstants.CargoFile, SearchOption.AllDirectories))
             {
                 JObject json;
@@ -46,12 +47,14 @@ namespace CC.Game
                     continue;
                 }
 
+                // Try to load the cargo if we have one of those files.
                 if (TryLoadCargo(jsonPath, json, out var customCargo))
                 {
                     newCargos.Add(customCargo);
                 }
             }
 
+            // If we did load any cargo...
             if (newCargos.Count > 0)
             {
                 CCMod.Log($"Loaded {newCargos.Count} cargos from {mod.Path}");
@@ -61,6 +64,7 @@ namespace CC.Game
                     CCMod.Log($"{item.v1} | {item.id}");
                 }
 
+                // Recalculate cache so the game knows we added a new cargo.
                 Globals.G.Types.RecalculateCaches();
             }
         }
@@ -69,6 +73,7 @@ namespace CC.Game
         {
             CustomCargo? c = json.ToObject<CustomCargo>();
 
+            // Something is wrong with the file.
             if (c == null)
             {
                 CCMod.Error($"Could not load cargo from file '{jsonPath}'");
@@ -87,6 +92,7 @@ namespace CC.Game
             // Assign a new enum value, and increment the counter so the next one isn't the same.
             c.Id = s_cargoV1++;
 
+            // If no cargo groups were defined, assume a cargo group with only this cargo.
             if (c.CargoGroups.Length == 0)
             {
                 c.CargoGroups = new[] { c.GetDefaultCargoGroup() };
@@ -185,6 +191,7 @@ namespace CC.Game
 
             foreach (var item in group.CargosIds)
             {
+                // Find cargo for the group using the id (name).
                 if (!Globals.G.Types.cargos.TryFind(x => x.id == item, out var cargo))
                 {
                     CCMod.Error($"Cargo '{item}' is missing (cargo group for '{cargoName}')");

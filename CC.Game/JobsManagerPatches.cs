@@ -33,6 +33,7 @@ namespace CC.Game
             CCMod.Log("First attempt at job generation started, injecting new routes before it runs...");
             CCMod.Log(string.Join(", ", SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Keys));
 
+            // Inject routes for each cargo the mod loaded.
             foreach (var item in CargoManager.AddedCargos)
             {
                 CCMod.Log($"Injecting routes for cargo '{item.Name}'...");

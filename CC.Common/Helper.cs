@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace CC.Common
+﻿namespace CC.Common
 {
     public static class Helper
     {

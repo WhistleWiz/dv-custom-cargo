@@ -10,6 +10,7 @@ namespace CC.Game
     {
         // Thanks Passenger Jobs mod!
 
+        // Extend the array of actual values with the ones added by the mod.
         [HarmonyPatch(nameof(Enum.GetValues))]
         [HarmonyPostfix]
         public static void GetValuesPostfix(Type enumType, ref Array __result)
@@ -28,6 +29,7 @@ namespace CC.Game
             return result;
         }
 
+        // Consider values defined by the mod as valid enum values.
         [HarmonyPatch(nameof(Enum.IsDefined))]
         [HarmonyPrefix]
         public static bool IsDefinedPrefix(Type enumType, object value, ref bool __result)

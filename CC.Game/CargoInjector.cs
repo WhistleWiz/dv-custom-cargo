@@ -1,13 +1,8 @@
 ﻿using CC.Common;
-using DV.Logic.Job;
 using DV.ThingTypes;
-using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
-using Mono.Cecil;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace CC.Game
 {
@@ -15,6 +10,7 @@ namespace CC.Game
     {
         public static void InjectRoutes(CustomCargo cargo)
         {
+            // Find the stations where we need to inject new routes.
             var srcStations = new List<StationController>();
             var destStations = new List<StationController>();
 
@@ -42,6 +38,7 @@ namespace CC.Game
                 destStations.Add(station);
             }
 
+            // If there's no source or destination stations, don't add any routes.
             if (srcStations.Count == 0)
             {
                 CCMod.Error("Cargo has no source stations! Skipping injection...");
@@ -54,6 +51,8 @@ namespace CC.Game
                 return;
             }
 
+            // Add each cargo group to each source station, then also add
+            // the cargo to the station's warehouse machine.
             foreach (var station in srcStations)
             {
                 foreach (var group in cargo.CargoGroups)
@@ -81,12 +80,15 @@ namespace CC.Game
 
         private static void AddCargoToWarehouse(StationController station, CustomCargo cargo)
         {
+            // Grab only one warehouse machine at the station.
             CCMod.Log($"Adding cargo to station warehouse: '{station.name}'");
             var machine = station.logicStation.yard.WarehouseMachines.First();
 
             if (machine != null)
             {
+                // Get the controller for the machine we are using.
                 var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
+                // Add the cargo to the list of supported cargos.
                 machine.SupportedCargoTypes.Add((CargoType)cargo.Id);
                 controller.supportedCargoTypes.Add((CargoType)cargo.Id);
             }
