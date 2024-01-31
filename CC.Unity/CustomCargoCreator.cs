@@ -68,29 +68,49 @@ namespace CC.Unity
             path = path + "/" + assetPath.Substring(7);
             path = Path.GetDirectoryName(path);
 
-            if (Models.Count == 0)
+            List<string> extraFiles = new List<string>();
+            string bundlePath = string.Empty;
+
+            if (Models.Count > 0)
             {
-                Debug.Log("Zipping cargo mod...");
-                ZipUtility.WriteToZip(Cargo, path);
-                Debug.Log("Simple zip created (no model bundle)!");
-                return;
+                Debug.Log("Building asset bundle...");
+
+                BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(assetPath),
+                    GetAssetBuilds(Models.ToArray()),
+                    BuildAssetBundleOptions.None,
+                    BuildTarget.StandaloneWindows64);
+
+                bundlePath = Directory.EnumerateFiles(path, NameConstants.ModelBundle, SearchOption.TopDirectoryOnly).First();
+                extraFiles.Add(bundlePath);
             }
 
-            Debug.Log("Building asset bundle...");
+            // Add icon file if it exists.
+            string extraPath = Path.Combine(path, NameConstants.Icon);
 
-            BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(assetPath),
-                GetAssetBuilds(Models.ToArray()),
-                BuildAssetBundleOptions.None,
-                BuildTarget.StandaloneWindows64);
+            if (File.Exists(extraPath))
+            {
+                Debug.Log("Adding icon...");
+                extraFiles.Add(extraPath);
+            }
 
-            string bundlePath = Directory.EnumerateFiles(path, NameConstants.ModelBundle, SearchOption.TopDirectoryOnly).First();
+            // Same for the resource icon.
+            extraPath = Path.Combine(path, NameConstants.ResourceIcon);
+
+            if (File.Exists(extraPath))
+            {
+                Debug.Log("Adding resource icon...");
+                extraFiles.Add(extraPath);
+            }
 
             Debug.Log("Zipping cargo mod...");
-            ZipUtility.WriteToZip(Cargo, path, bundlePath);
+            ZipUtility.WriteToZip(Cargo, path, extraFiles.ToArray());
 
-            Debug.Log("Cleaning up...");
-            File.Delete(bundlePath);
-            File.Delete(bundlePath + ".manifest");
+            if (!string.IsNullOrEmpty(bundlePath))
+            {
+                Debug.Log("Cleaning up...");
+                File.Delete(bundlePath);
+                File.Delete(bundlePath + ".manifest");
+            }
 
             Debug.Log("Zip created!");
         }

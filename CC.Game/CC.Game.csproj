@@ -18,6 +18,7 @@
 		<Reference Include="UnityEngine" />
 		<Reference Include="UnityEngine.AssetBundleModule" />
 		<Reference Include="UnityEngine.CoreModule" />
+		<Reference Include="UnityEngine.ImageConversionModule" />
 		<Reference Include="UnityEngine.UI" />
 		<Reference Include="DVLangHelper.Data" />
 		<Reference Include="DVLangHelper.Runtime" />

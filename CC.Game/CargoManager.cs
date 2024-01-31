@@ -66,6 +66,7 @@ namespace CC.Game
         private static bool TryLoadCargo(string jsonPath, JObject json, out CargoType_v2 v2)
         {
             CustomCargo? c = json.ToObject<CustomCargo>();
+            var directory = Path.GetDirectoryName(jsonPath);
 
             // Something is wrong with the file.
             if (c == null)
@@ -109,8 +110,21 @@ namespace CC.Game
             // Add translations for this cargo.
             AddTranslations(c);
 
+            // Try to load icon files.
+            TryLoadIcons(directory, out var icon, out var resourceIcon);
+
+            if (icon != null)
+            {
+                v2.icon = icon;
+            }
+
+            if (resourceIcon != null)
+            {
+                v2.resourceIcon = resourceIcon;
+            }
+
             // Try to load any asset bundle with models.
-            TryLoadModels(jsonPath, out var models);
+            TryLoadModels(directory, out var models);
 
             // Add vanilla types to loadable info.
             AddLoadableInfo(c, v2, models);
@@ -118,9 +132,9 @@ namespace CC.Game
             return true;
         }
 
-        private static bool TryLoadModels(string jsonPath, out ModelsForVanillaCar[] models)
+        private static bool TryLoadModels(string directory, out ModelsForVanillaCar[] models)
         {
-            var assetBundlePath = Path.Combine(Path.GetDirectoryName(jsonPath), NameConstants.ModelBundle);
+            var assetBundlePath = Path.Combine(directory, NameConstants.ModelBundle);
 
             if (!File.Exists(assetBundlePath))
             {
@@ -158,6 +172,41 @@ namespace CC.Game
             assetBundle.Unload(false);
 
             return true;
+        }
+
+        private static void TryLoadIcons(string directory, out Sprite? icon, out Sprite? resourceIcon)
+        {
+            byte[] data;
+
+            var path = Path.Combine(directory, NameConstants.Icon);
+
+            if (File.Exists(path))
+            {
+                data = File.ReadAllBytes(path);
+                var tex = new Texture2D(2, 2);
+                tex.LoadImage(data);
+
+                icon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
+            }
+            else
+            {
+                icon = null;
+            }
+
+            path = Path.Combine(directory, NameConstants.ResourceIcon);
+
+            if (File.Exists(path))
+            {
+                data = File.ReadAllBytes(path);
+                var tex = new Texture2D(2, 2);
+                tex.LoadImage(data);
+
+                resourceIcon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
+            }
+            else
+            {
+                resourceIcon = null;
+            }
         }
 
         private static void AddTranslations(CustomCargo cargo)
