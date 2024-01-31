@@ -16,12 +16,6 @@ namespace CC.Game
 {
     internal static class CargoManager
     {
-        // Custom v1 values start at 10k.
-        private const int Start = 10000;
-
-        // Global counter to never reuse the same value.
-        private static int s_cargoV1 = Start;
-
         public static HashSet<CargoType> AddedValues = new HashSet<CargoType>();
         public static List<CustomCargo> AddedCargos = new List<CustomCargo>();
 
@@ -88,9 +82,6 @@ namespace CC.Game
                 v2 = null!;
                 return false;
             }
-
-            // Assign a new enum value, and increment the counter so the next one isn't the same.
-            c.Value = s_cargoV1++;
 
             // If no cargo groups were defined, assume a cargo group with only this cargo.
             if (c.CargoGroups.Length == 0)
