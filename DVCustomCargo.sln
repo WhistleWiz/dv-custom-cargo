@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CC.Common", "CC.Common\CC.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CC.Creator", "CC.Creator\CC.Creator.csproj", "{8E6B61FF-C5AD-4525-B959-7D80E27F80C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CC.Unity", "CC.Unity\CC.Unity.csproj", "{E98B17B0-B170-4F0D-8548-108C644805B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CC.Unity", "CC.Unity\CC.Unity.csproj", "{E98B17B0-B170-4F0D-8548-108C644805B2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C92A2A56-79DE-49CA-9F9E-F03B9B2066B9}"
+	ProjectSection(SolutionItems) = preProject
+		repository.json = repository.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

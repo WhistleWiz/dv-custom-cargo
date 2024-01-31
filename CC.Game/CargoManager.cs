@@ -97,6 +97,14 @@ namespace CC.Game
             {
                 c.CargoGroups = new[] { c.GetDefaultCargoGroup() };
             }
+            else
+            {
+                // Ensure the cargo that defines the groups is in them.
+                foreach (var group in c.CargoGroups)
+                {
+                    group.AddIdIfMissing(c.Name);
+                }
+            }
 
             // Convert into actual cargo and add it.
             v2 = c.ToV2();
@@ -163,9 +171,9 @@ namespace CC.Game
 
         private static void AddTranslations(CustomCargo cargo)
         {
-            if (!string.IsNullOrEmpty(cargo.Csv))
+            if (!string.IsNullOrEmpty(cargo.CSVLink))
             {
-                CCMod.Translations.AddTranslationsFromWebCsv(cargo.Csv!);
+                CCMod.Translations.AddTranslationsFromWebCsv(cargo.CSVLink!);
                 return;
             }
 

@@ -1,0 +1,9 @@
+{
+  "Releases": [
+    {
+      "Id": "DVCustomCargo",
+      "Version": "0.0.1",
+      "DownloadUrl": "https://github.com/WhistleWiz/dv-custom-cargo/releases/download",
+    }
+  ]
+}

@@ -69,7 +69,7 @@ namespace CC.Common
 
         public static JObject GetModInfo(CustomCargo c)
         {
-            return new JObject
+            var modInfo = new JObject
             {
                 { "Id", GetFullModId(c) },
                 { "DisplayName", $"Custom Cargo {c.Name}" },
@@ -78,6 +78,20 @@ namespace CC.Common
                 { "ManagerVersion", "0.27.3" },
                 { "Requirements", JToken.FromObject(new[] { NameConstants.MainModId }) },
             };
+
+            // If a homepage was defined, also add the link.
+            if (!string.IsNullOrEmpty(c.HomePage))
+            {
+                modInfo.Add("HomePage", c.HomePage);
+            }
+
+            // If a repository was defined, also add the link.
+            if (!string.IsNullOrEmpty(c.Repository))
+            {
+                modInfo.Add("Repository", c.Repository);
+            }
+
+            return modInfo;
         }
     }
 }

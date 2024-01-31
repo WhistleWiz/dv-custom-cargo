@@ -20,8 +20,8 @@ namespace CC.Common
         [Tooltip("The licenses required to haul this cargo")]
         public BaseGameLicense[] Licenses = new[] { BaseGameLicense.Basic };
 
-        [Tooltip("Optional link to a CSV file to dynamically load translations")]
-        public string? Csv;
+        [Tooltip("Link to a CSV file to dynamically load translations (Optional)")]
+        public string? CSVLink;
         [Tooltip("These translations are used on job booklets")]
         public TranslationData? TranslationDataFull;
         [Tooltip("These translations are used on the side of cars and the remote")]
@@ -35,14 +35,19 @@ namespace CC.Common
 
         [Tooltip("The cargo groups that this cargo belongs to\n" +
             "A cargo group defines what cargos can be hauled together\n" +
-            "You can use vanilla cargos or other custom cargos")]
+            "You can use vanilla cargos or other custom cargos (use their id)")]
         public CustomCargoGroup[] CargoGroups = new CustomCargoGroup[0];
 
         [Tooltip("If this cargo can be loaded on a vanilla wagon (Optional)")]
         public CarParentType[] VanillaTypesToLoad = new CarParentType[0];
 
+        [Tooltip("Your name, probably")]
         public string Author = string.Empty;
         public string Version = "1.0.0";
+        [Tooltip("Add a link to your website here (Optional)")]
+        public string? HomePage;
+        [Tooltip("Add a repository link here to be able to automatically update your cargo (Optional)")]
+        public string? Repository;
 
         public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}";
         public string LocalizationKeyShort => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}_short";

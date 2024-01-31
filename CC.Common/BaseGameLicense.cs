@@ -1,8 +1,5 @@
-﻿using System;
-
-namespace CC.Common
+﻿namespace CC.Common
 {
-    [Flags]
     public enum BaseGameLicense
     {
         Basic = 0,
