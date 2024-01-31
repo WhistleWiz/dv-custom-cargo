@@ -82,15 +82,15 @@ namespace CC.Game
             }
 
             // Handle duplicate names (not).
-            if (Globals.G.Types.cargos.Any(x => x.id == c.Name))
+            if (Globals.G.Types.cargos.Any(x => x.id == c.Identifier))
             {
-                CCMod.Error($"Cargo with name '{c.Name}' already exists!");
+                CCMod.Error($"Cargo with name '{c.Identifier}' already exists!");
                 v2 = null!;
                 return false;
             }
 
             // Assign a new enum value, and increment the counter so the next one isn't the same.
-            c.Id = s_cargoV1++;
+            c.Value = s_cargoV1++;
 
             // If no cargo groups were defined, assume a cargo group with only this cargo.
             if (c.CargoGroups.Length == 0)
@@ -102,7 +102,7 @@ namespace CC.Game
                 // Ensure the cargo that defines the groups is in them.
                 foreach (var group in c.CargoGroups)
                 {
-                    group.AddIdIfMissing(c.Name);
+                    group.AddIdIfMissing(c.Identifier);
                 }
             }
 
@@ -182,7 +182,7 @@ namespace CC.Game
             {
                 CCMod.Translations.AddTranslations(
                     cargo.LocalizationKeyFull,
-                    TranslationData.Default(cargo.Name));
+                    TranslationData.Default(cargo.Identifier));
             }
             else
             {
@@ -195,7 +195,7 @@ namespace CC.Game
             {
                 CCMod.Translations.AddTranslations(
                     cargo.LocalizationKeyShort,
-                    TranslationData.Default(cargo.Name));
+                    TranslationData.Default(cargo.Identifier));
             }
             else
             {
@@ -243,8 +243,8 @@ namespace CC.Game
         {
             var newCargo = ScriptableObject.CreateInstance<CargoType_v2>();
 
-            newCargo.id = cargo.Name;
-            newCargo.v1 = (CargoType)cargo.Id;
+            newCargo.id = cargo.Identifier;
+            newCargo.v1 = (CargoType)cargo.Value;
 
             newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
             newCargo.localizationKeyShort = cargo.LocalizationKeyShort;

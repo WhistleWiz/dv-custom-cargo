@@ -64,7 +64,7 @@ namespace CC.Common
 
         public static string GetFullModId(CustomCargo c)
         {
-            return $"{NameConstants.ModIdPrefix}{c.Name.Replace(" ", "")}";
+            return $"{NameConstants.ModIdPrefix}{c.Identifier.Replace(" ", "")}";
         }
 
         public static JObject GetModInfo(CustomCargo c)
@@ -72,7 +72,7 @@ namespace CC.Common
             var modInfo = new JObject
             {
                 { "Id", GetFullModId(c) },
-                { "DisplayName", $"Custom Cargo {c.Name}" },
+                { "DisplayName", $"Custom Cargo {c.Identifier}" },
                 { "Version", c.Version },
                 { "Author", c.Author },
                 { "ManagerVersion", "0.27.3" },

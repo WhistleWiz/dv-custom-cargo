@@ -18,7 +18,7 @@ namespace CC.Game
             {
                 if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(source, out var station))
                 {
-                    CCMod.Warning($"Could not find source station '{source}' for cargo '{cargo.Name}' " +
+                    CCMod.Warning($"Could not find source station '{source}' for cargo '{cargo.Identifier}' " +
                         $"(is vanilla: {Helper.IsVanillaStation(source)})!");
                     continue;
                 }
@@ -30,7 +30,7 @@ namespace CC.Game
             {
                 if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(destination, out var station))
                 {
-                    CCMod.Warning($"Could not find destination station '{destination}' for cargo '{cargo.Name}' " +
+                    CCMod.Warning($"Could not find destination station '{destination}' for cargo '{cargo.Identifier}' " +
                         $"(is vanilla: {Helper.IsVanillaStation(destination)})!");
                     continue;
                 }
@@ -58,7 +58,7 @@ namespace CC.Game
                 foreach (var group in cargo.CargoGroups)
                 {
                     station.proceduralJobsRuleset.outputCargoGroups.Add(new CargoGroup(
-                        CargoManager.ToCargoTypeGroup(group, cargo.Name),
+                        CargoManager.ToCargoTypeGroup(group, cargo.Identifier),
                         destStations));
                 }
 
@@ -70,7 +70,7 @@ namespace CC.Game
                 foreach (var group in cargo.CargoGroups)
                 {
                     station.proceduralJobsRuleset.inputCargoGroups.Add(new CargoGroup(
-                        CargoManager.ToCargoTypeGroup(group, cargo.Name),
+                        CargoManager.ToCargoTypeGroup(group, cargo.Identifier),
                         srcStations));
                 }
 
@@ -89,8 +89,8 @@ namespace CC.Game
                 // Get the controller for the machine we are using.
                 var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
                 // Add the cargo to the list of supported cargos.
-                machine.SupportedCargoTypes.Add((CargoType)cargo.Id);
-                controller.supportedCargoTypes.Add((CargoType)cargo.Id);
+                machine.SupportedCargoTypes.Add((CargoType)cargo.Value);
+                controller.supportedCargoTypes.Add((CargoType)cargo.Value);
             }
         }
     }

@@ -36,7 +36,7 @@ namespace CC.Creator
                 "Just fill in the fields for your custom cargo!\n");
 
             Console.WriteLine("Custom cargo ID (name):");
-            c.Name = Console.ReadLine();
+            c.Identifier = Console.ReadLine();
 
             Console.WriteLine("Cargo mass per unit:");
             c.MassPerUnit = ForceReadFloat(f => f > 0, "Must be a number greater than 0!");

@@ -18,12 +18,45 @@ namespace CC.Unity.Editor
         public CarParentType TypeForNewSet = CarParentType.None;
 
         private CustomCargoCreator _ccc = null!;
+        private SerializedProperty _cargo = null!;
+
+        private void OnEnable()
+        {
+            _cargo = serializedObject.FindProperty(nameof(CustomCargoCreator.Cargo));
+        }
 
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
-
             _ccc = (CustomCargoCreator)target;
+
+            // Iterate through the properties manually so we can have custom behaviour.
+            SerializedProperty current = _cargo.FindPropertyRelative(nameof(CustomCargo.Identifier));
+
+            EditorGUILayout.PropertyField(current);
+
+            current.Next(false);
+
+            // Don't show the internal IDs or the option to override them to the user for now.
+            //if (current.boolValue)
+            //{
+            //    GUI.backgroundColor = Warning;
+            //}
+
+            //EditorGUILayout.PropertyField(current);
+            //GUI.enabled = current.boolValue;
+
+            //current.Next(false);
+            //current.intValue = _ccc.Cargo.Value;
+            //EditorGUILayout.PropertyField(current);
+            //GUI.enabled = true;
+            //GUI.backgroundColor = Color.white;
+
+            current.Next(false);
+
+            while (current.Next(false))
+            {
+                EditorGUILayout.PropertyField(current);
+            }
 
             EditorGUILayout.Space();
             EditorGUILayout.BeginHorizontal();
@@ -51,6 +84,8 @@ namespace CC.Unity.Editor
             }
 
             GUI.backgroundColor = Color.white;
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

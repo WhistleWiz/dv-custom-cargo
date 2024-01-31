@@ -1,6 +1,7 @@
 ﻿using DVLangHelper.Data;
 using Newtonsoft.Json;
 using System;
+using System.Security.Policy;
 using UnityEngine;
 
 namespace CC.Common
@@ -8,10 +9,17 @@ namespace CC.Common
     [Serializable]
     public class CustomCargo
     {
-        [JsonIgnore, HideInInspector]
-        public int Id = 10000;
+        public const int CUSTOM_TYPE_OFFSET = 0x4000_0000;
+        public const int CUSTOM_TYPE_MASK = CUSTOM_TYPE_OFFSET - 1;
+
         [Tooltip("The name (id) of the cargo")]
-        public string Name = "MyCargoName";
+        public string Identifier = "MyCargoName";
+        [JsonIgnore, Tooltip("Check this to allow overriding the cargo's internal value\n" +
+            "DO NOT  override unless there's a conflict with another mod")]
+        public bool OverrideValue = false;
+        [Tooltip("The internal value of the cargo\n" +
+            "DO NOT modify it manually unless there's a conflict with another mod")]
+        public int Value = 10000;
         [Tooltip("Mass per carload\n" +
             "If loading on vanilla cars, use those as a base")]
         public float MassPerUnit = 1000.0f;
@@ -49,12 +57,29 @@ namespace CC.Common
         [Tooltip("Add a repository link here to be able to automatically update your cargo (Optional)")]
         public string? Repository;
 
-        public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}";
-        public string LocalizationKeyShort => $"{NameConstants.LocalizeRoot}/{Name.Replace(" ", "_").ToLowerInvariant()}_short";
+        public string LocalizationKeyFull => $"{NameConstants.LocalizeRoot}/{Identifier.Replace(" ", "_").ToLowerInvariant()}";
+        public string LocalizationKeyShort => $"{NameConstants.LocalizeRoot}/{Identifier.Replace(" ", "_").ToLowerInvariant()}_short";
 
         public CustomCargoGroup GetDefaultCargoGroup()
         {
-            return new CustomCargoGroup(Name);
+            return new CustomCargoGroup(Identifier);
+        }
+
+        public void GenerateId()
+        {
+            Value = Mathf.Max(10000, GenerateId(Identifier));
+        }
+
+        public static int GenerateId(string name)
+        {
+            // Really? Really.
+            // Unfortunately it's a bit hard to get unique ids for everyone
+            // when its not known what other mods have, so this is the best
+            // we can do for now. Otherwise, you can override the generated
+            // value in case there's a known collision.
+            // https://github.com/derail-valley-modding/custom-car-loader/blob/v1.8.4/DVCustomCarLoader/BaseInjector.cs#L15
+            int hash = name.GetHashCode();
+            return (hash & CUSTOM_TYPE_MASK) + CUSTOM_TYPE_OFFSET;
         }
     }
 }

@@ -36,7 +36,7 @@ namespace CC.Game
             // Inject routes for each cargo the mod loaded.
             foreach (var item in CargoManager.AddedCargos)
             {
-                CCMod.Log($"Injecting routes for cargo '{item.Name}'...");
+                CCMod.Log($"Injecting routes for cargo '{item.Identifier}'...");
                 CargoInjector.InjectRoutes(item);
             }
         }

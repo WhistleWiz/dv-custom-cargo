@@ -20,6 +20,11 @@ namespace CC.Unity
         private void OnValidate()
         {
             _requireConfirm = false;
+
+            if (!Cargo.OverrideValue)
+            {
+                Cargo.GenerateId();
+            }
         }
 
         public void CreateModelSet(CarParentType parentType)
@@ -31,7 +36,7 @@ namespace CC.Unity
             set.CarType = parentType;
 
             EditorUtility.SetDirty(this);
-            AssetDatabase.CreateAsset(set, $"{path}/{Cargo.Name.Replace(" ", "_")}_{parentType}.asset");
+            AssetDatabase.CreateAsset(set, $"{path}/{Cargo.Identifier.Replace(" ", "_")}_{parentType}.asset");
             AssetDatabase.SaveAssets();
 
             EditorUtility.FocusProjectWindow();
