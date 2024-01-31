@@ -15,6 +15,8 @@ namespace CC.Unity
 
         private bool _requireConfirm = false;
 
+        internal bool DisplayWarning => _requireConfirm;
+
         private void OnValidate()
         {
             _requireConfirm = false;

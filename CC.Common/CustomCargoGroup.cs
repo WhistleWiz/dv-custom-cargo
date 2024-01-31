@@ -9,6 +9,11 @@ namespace CC.Common
     {
         public List<string> CargosIds;
 
+        public CustomCargoGroup()
+        {
+            CargosIds = new List<string>();
+        }
+
         public CustomCargoGroup(params string[] cargos)
         {
             CargosIds = cargos.ToList();
