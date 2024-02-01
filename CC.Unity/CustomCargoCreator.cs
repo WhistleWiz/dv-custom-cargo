@@ -111,9 +111,17 @@ namespace CC.Unity
                 Debug.Log("Cleaning up...");
                 File.Delete(bundlePath);
                 File.Delete(bundlePath + ".manifest");
+
+                // Delete the 2nd bundle too.
+                bundlePath = Path.GetFileName(path);
+                bundlePath = Path.Combine(path, bundlePath);
+
+                File.Delete(bundlePath);
+                File.Delete(bundlePath + ".manifest");
             }
 
             Debug.Log("Zip created!");
+            AssetDatabase.Refresh();
         }
 
         private static AssetBundleBuild[] GetAssetBuilds(params Object[] assets)

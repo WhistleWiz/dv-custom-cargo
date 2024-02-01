@@ -53,6 +53,10 @@ namespace CC.Unity.Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
+            // Update the object before showing the export button.
+            serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
             if (_ccc.DisplayWarning)
             {
                 GUI.backgroundColor = Warning;
@@ -61,11 +65,11 @@ namespace CC.Unity.Editor
             if (GUILayout.Button(s_exportContent))
             {
                 _ccc.ExportModels();
+                // Prevent a weird unity behaviour that is otherwise harmless.
+                GUIUtility.ExitGUI();
             }
 
             GUI.backgroundColor = Color.white;
-
-            serializedObject.ApplyModifiedProperties();
         }
     }
 }
