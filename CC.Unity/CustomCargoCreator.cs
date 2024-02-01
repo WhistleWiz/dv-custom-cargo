@@ -20,6 +20,12 @@ namespace CC.Unity
         private void OnValidate()
         {
             _requireConfirm = false;
+
+            // Make sure this cargo is always in any group.
+            foreach (var group in Cargo.CargoGroups)
+            {
+                group.AddIdIfMissing(Cargo.Identifier);
+            }
         }
 
         public void CreateModelSet(CarParentType parentType)

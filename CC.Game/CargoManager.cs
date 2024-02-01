@@ -82,18 +82,10 @@ namespace CC.Game
                 return false;
             }
 
-            // If no cargo groups were defined, assume a cargo group with only this cargo.
-            if (c.CargoGroups.Length == 0)
+            // Ensure the cargo that defines the groups is in them.
+            foreach (var group in c.CargoGroups)
             {
-                c.CargoGroups = new[] { c.GetDefaultCargoGroup() };
-            }
-            else
-            {
-                // Ensure the cargo that defines the groups is in them.
-                foreach (var group in c.CargoGroups)
-                {
-                    group.AddIdIfMissing(c.Identifier);
-                }
+                group.AddIdIfMissing(c.Identifier);
             }
 
             // Convert into actual cargo and add it.
