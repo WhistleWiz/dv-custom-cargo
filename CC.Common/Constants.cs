@@ -1,6 +1,6 @@
 ﻿namespace CC.Common
 {
-    public static class NameConstants
+    public static class Constants
     {
         // Files.
         public const string ModInfo = "Info.json";
@@ -16,5 +16,9 @@
 
         // Localization.
         public const string LocalizeRoot = "customcargo";
+
+        // Misc.
+        public const int DefaultCargoValue = 10000;
+        public const string SaveKey = "dv_custom_cargo";
     }
 }

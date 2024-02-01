@@ -24,7 +24,7 @@ namespace CC.Common
                     serializer.Formatting = Formatting.Indented;
 
                     // Create the mod info file, and write the usual stuff in it.
-                    var file = archive.CreateEntry(Path.Combine(fileName, NameConstants.ModInfo));
+                    var file = archive.CreateEntry(Path.Combine(fileName, Constants.ModInfo));
 
                     using (var entryStream = file.Open())
                     using (var streamWriter = new StreamWriter(entryStream))
@@ -34,7 +34,7 @@ namespace CC.Common
                     }
 
                     // Create the cargo file, and serialize the CustomCargo into it.
-                    file = archive.CreateEntry(Path.Combine(fileName, NameConstants.CargoFile));
+                    file = archive.CreateEntry(Path.Combine(fileName, Constants.CargoFile));
 
                     using (var entryStream = file.Open())
                     using (var streamWriter = new StreamWriter(entryStream))
@@ -64,7 +64,7 @@ namespace CC.Common
 
         public static string GetFullModId(CustomCargo c)
         {
-            return $"{NameConstants.ModIdPrefix}{c.Identifier.Replace(" ", "")}";
+            return $"{Constants.ModIdPrefix}{c.Identifier.Replace(" ", "")}";
         }
 
         public static JObject GetModInfo(CustomCargo c)
@@ -76,7 +76,7 @@ namespace CC.Common
                 { "Version", c.Version },
                 { "Author", c.Author },
                 { "ManagerVersion", "0.27.3" },
-                { "Requirements", JToken.FromObject(new[] { NameConstants.MainModId }) },
+                { "Requirements", JToken.FromObject(new[] { Constants.MainModId }) },
             };
 
             // If a homepage was defined, also add the link.

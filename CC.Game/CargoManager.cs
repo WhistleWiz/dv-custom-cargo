@@ -17,14 +17,15 @@ namespace CC.Game
     internal static class CargoManager
     {
         public static HashSet<CargoType> AddedValues = new HashSet<CargoType>();
-        public static List<CustomCargo> AddedCargos = new List<CustomCargo>();
+        public static Dictionary<string, int> Mapping = new Dictionary<string, int>();
+        public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
 
         public static void LoadCargos(UnityModManager.ModEntry mod)
         {
             List<CargoType_v2> newCargos = new List<CargoType_v2>();
 
             // Find the 'cargo.json' files.
-            foreach (string jsonPath in Directory.EnumerateFiles(mod.Path, NameConstants.CargoFile, SearchOption.AllDirectories))
+            foreach (string jsonPath in Directory.EnumerateFiles(mod.Path, Constants.CargoFile, SearchOption.AllDirectories))
             {
                 JObject json;
 
@@ -55,11 +56,8 @@ namespace CC.Game
 
                 foreach (var item in newCargos)
                 {
-                    CCMod.Log($"{item.v1} | {item.id}");
+                    CCMod.Log($"{item.id}");
                 }
-
-                // Recalculate cache so the game knows we added a new cargo.
-                Globals.G.Types.RecalculateCaches();
             }
         }
 
@@ -101,11 +99,7 @@ namespace CC.Game
             // Convert into actual cargo and add it.
             v2 = c.ToV2();
             Globals.G.Types.cargos.Add(v2);
-
-            // Cache the new enum so it can be patched in,
-            // and the cargo for easy access.
-            AddedValues.Add(v2.v1);
-            AddedCargos.Add(c);
+            AddedCargos.Add((c, v2));
 
             // Add translations for this cargo.
             AddTranslations(c);
@@ -134,7 +128,7 @@ namespace CC.Game
 
         private static bool TryLoadModels(string directory, out ModelsForVanillaCar[] models)
         {
-            var assetBundlePath = Path.Combine(directory, NameConstants.ModelBundle);
+            var assetBundlePath = Path.Combine(directory, Constants.ModelBundle);
 
             if (!File.Exists(assetBundlePath))
             {
@@ -178,14 +172,18 @@ namespace CC.Game
         {
             byte[] data;
 
-            var path = Path.Combine(directory, NameConstants.Icon);
+            // Path to the image.
+            var path = Path.Combine(directory, Constants.Icon);
 
             if (File.Exists(path))
             {
+                // Shove the raw bytes of the image into the texture.
+                // Texture size is not important and will be automatically changed.
                 data = File.ReadAllBytes(path);
                 var tex = new Texture2D(2, 2);
                 tex.LoadImage(data);
 
+                // Create a sprite that covers the whole texture.
                 icon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
             }
             else
@@ -193,7 +191,8 @@ namespace CC.Game
                 icon = null;
             }
 
-            path = Path.Combine(directory, NameConstants.ResourceIcon);
+            // Repeat for the resource icon.
+            path = Path.Combine(directory, Constants.ResourceIcon);
 
             if (File.Exists(path))
             {
@@ -284,7 +283,7 @@ namespace CC.Game
             var newCargo = ScriptableObject.CreateInstance<CargoType_v2>();
 
             newCargo.id = cargo.Identifier;
-            newCargo.v1 = (CargoType)cargo.Value;
+            newCargo.v1 = (CargoType)Constants.DefaultCargoValue;
 
             newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
             newCargo.localizationKeyShort = cargo.LocalizationKeyShort;
@@ -316,6 +315,37 @@ namespace CC.Game
             }
 
             return types;
+        }
+
+        public static void ApplyMappings()
+        {
+            CCMod.Log("Applying mappings...");
+
+            int highest = Constants.DefaultCargoValue;
+
+            // Get the highest ID, to start counting from there.
+            foreach (var item in Mapping)
+            {
+                highest = Mathf.Max(highest, (int)item.Value);
+            }
+
+            AddedValues = new HashSet<CargoType>();
+
+            foreach (var (_, v2) in AddedCargos)
+            {
+                if (!Mapping.TryGetValue(v2.id, out int type))
+                {
+                    type = ++highest;
+                    Mapping.Add(v2.id, type);
+                }
+
+                v2.v1 = (CargoType)type;
+                AddedValues.Add((CargoType)type);
+            }
+
+            // Recalculate caches with the new values.
+            Globals.G.Types.RecalculateCaches();
+            CCMod.Log($"Mappings applied: {AddedValues.Count}/{Mapping.Count}, highest is {highest}");
         }
     }
 }

@@ -34,10 +34,10 @@ namespace CC.Game
             CCMod.Log(string.Join(", ", SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Keys));
 
             // Inject routes for each cargo the mod loaded.
-            foreach (var item in CargoManager.AddedCargos)
+            foreach (var (custom, v2) in CargoManager.AddedCargos)
             {
-                CCMod.Log($"Injecting routes for cargo '{item.Identifier}'...");
-                CargoInjector.InjectRoutes(item);
+                CCMod.Log($"Injecting routes for cargo '{v2.id}'...");
+                CargoInjector.InjectRoutes(custom, v2);
             }
         }
     }

@@ -8,17 +8,17 @@ namespace CC.Game
 {
     internal static class CargoInjector
     {
-        public static void InjectRoutes(CustomCargo cargo)
+        public static void InjectRoutes(CustomCargo cc, CargoType_v2 ct)
         {
             // Find the stations where we need to inject new routes.
             var srcStations = new List<StationController>();
             var destStations = new List<StationController>();
 
-            foreach (var source in cargo.SourceStations)
+            foreach (var source in cc.SourceStations)
             {
                 if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(source, out var station))
                 {
-                    CCMod.Warning($"Could not find source station '{source}' for cargo '{cargo.Identifier}' " +
+                    CCMod.Warning($"Could not find source station '{source}' for cargo '{cc.Identifier}' " +
                         $"(is vanilla: {Helper.IsVanillaStation(source)})!");
                     continue;
                 }
@@ -26,11 +26,11 @@ namespace CC.Game
                 srcStations.Add(station);
             }
 
-            foreach (var destination in cargo.DestinationStations)
+            foreach (var destination in cc.DestinationStations)
             {
                 if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(destination, out var station))
                 {
-                    CCMod.Warning($"Could not find destination station '{destination}' for cargo '{cargo.Identifier}' " +
+                    CCMod.Warning($"Could not find destination station '{destination}' for cargo '{cc.Identifier}' " +
                         $"(is vanilla: {Helper.IsVanillaStation(destination)})!");
                     continue;
                 }
@@ -55,30 +55,30 @@ namespace CC.Game
             // the cargo to the station's warehouse machine.
             foreach (var station in srcStations)
             {
-                foreach (var group in cargo.CargoGroups)
+                foreach (var group in cc.CargoGroups)
                 {
                     station.proceduralJobsRuleset.outputCargoGroups.Add(new CargoGroup(
-                        CargoManager.ToCargoTypeGroup(group, cargo.Identifier),
+                        CargoManager.ToCargoTypeGroup(group, cc.Identifier),
                         destStations));
                 }
 
-                AddCargoToWarehouse(station, cargo);
+                AddCargoToWarehouse(station, ct.v1);
             }
 
             foreach (var station in destStations)
             {
-                foreach (var group in cargo.CargoGroups)
+                foreach (var group in cc.CargoGroups)
                 {
                     station.proceduralJobsRuleset.inputCargoGroups.Add(new CargoGroup(
-                        CargoManager.ToCargoTypeGroup(group, cargo.Identifier),
+                        CargoManager.ToCargoTypeGroup(group, cc.Identifier),
                         srcStations));
                 }
 
-                AddCargoToWarehouse(station, cargo);
+                AddCargoToWarehouse(station, ct.v1);
             }
         }
 
-        private static void AddCargoToWarehouse(StationController station, CustomCargo cargo)
+        private static void AddCargoToWarehouse(StationController station, CargoType cargo)
         {
             // Grab only one warehouse machine at the station.
             CCMod.Log($"Adding cargo to station warehouse: '{station.name}'");
@@ -89,8 +89,8 @@ namespace CC.Game
                 // Get the controller for the machine we are using.
                 var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
                 // Add the cargo to the list of supported cargos.
-                machine.SupportedCargoTypes.Add((CargoType)cargo.Value);
-                controller.supportedCargoTypes.Add((CargoType)cargo.Value);
+                machine.SupportedCargoTypes.Add(cargo);
+                controller.supportedCargoTypes.Add(cargo);
             }
         }
     }

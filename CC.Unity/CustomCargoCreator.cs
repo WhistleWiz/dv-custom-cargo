@@ -20,11 +20,6 @@ namespace CC.Unity
         private void OnValidate()
         {
             _requireConfirm = false;
-
-            if (!Cargo.OverrideValue)
-            {
-                Cargo.GenerateId();
-            }
         }
 
         public void CreateModelSet(CarParentType parentType)
@@ -80,12 +75,12 @@ namespace CC.Unity
                     BuildAssetBundleOptions.None,
                     BuildTarget.StandaloneWindows64);
 
-                bundlePath = Directory.EnumerateFiles(path, NameConstants.ModelBundle, SearchOption.TopDirectoryOnly).First();
+                bundlePath = Directory.EnumerateFiles(path, Constants.ModelBundle, SearchOption.TopDirectoryOnly).First();
                 extraFiles.Add(bundlePath);
             }
 
             // Add icon file if it exists.
-            string extraPath = Path.Combine(path, NameConstants.Icon);
+            string extraPath = Path.Combine(path, Constants.Icon);
 
             if (File.Exists(extraPath))
             {
@@ -94,7 +89,7 @@ namespace CC.Unity
             }
 
             // Same for the resource icon.
-            extraPath = Path.Combine(path, NameConstants.ResourceIcon);
+            extraPath = Path.Combine(path, Constants.ResourceIcon);
 
             if (File.Exists(extraPath))
             {
@@ -126,7 +121,7 @@ namespace CC.Unity
 
             var build = new AssetBundleBuild
             {
-                assetBundleName = NameConstants.ModelBundle,
+                assetBundleName = Constants.ModelBundle,
                 assetNames = names.ToArray()
             };
 
