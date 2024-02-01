@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace CC.Common
 {
     [Serializable]
     public class CustomCargoGroup
     {
+        [Delayed]
         public List<string> CargosIds;
 
         public CustomCargoGroup()
@@ -23,7 +25,7 @@ namespace CC.Common
         {
             if (!CargosIds.Contains(id))
             {
-                CargosIds.Add(id);
+                CargosIds.Insert(0, id);
             }
         }
     }
