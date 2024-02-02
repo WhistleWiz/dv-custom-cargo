@@ -7,7 +7,6 @@ namespace CC.Unity.Editor
     [CustomEditor(typeof(CustomCargoCreator))]
     internal class CustomCargoCreatorEditor : UnityEditor.Editor
     {
-        public static readonly Color Warning = new Color(2.00f, 1.50f, 0.25f);
 
         private static GUIContent s_createAddContent = new GUIContent("Create model set",
             "Creates and automatically assigns a model set for this cargo");
@@ -59,12 +58,12 @@ namespace CC.Unity.Editor
 
             if (_ccc.DisplayWarning)
             {
-                GUI.backgroundColor = Warning;
+                GUI.backgroundColor = EditorHelper.Colours.Warning;
             }
 
             if (GUILayout.Button(s_exportContent))
             {
-                _ccc.ExportModels();
+                _ccc.ExportBundle();
                 // Prevent a weird unity behaviour that is otherwise harmless.
                 GUIUtility.ExitGUI();
             }

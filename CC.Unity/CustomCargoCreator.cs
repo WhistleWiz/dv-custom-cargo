@@ -12,10 +12,15 @@ namespace CC.Unity
     {
         public CustomCargo Cargo = new CustomCargo();
         public List<ModelsForVanillaCar> Models = new List<ModelsForVanillaCar>();
+        public Sprite? Icon = null;
+        public Sprite? ResourceIcon = null;
 
         private bool _requireConfirm = false;
 
         internal bool DisplayWarning => _requireConfirm;
+        internal bool ShouldMakeBundle => Models.Count > 0 ||
+            Icon != null ||
+            ResourceIcon != null;
 
         private void OnValidate()
         {
@@ -26,6 +31,14 @@ namespace CC.Unity
             {
                 group.AddIdIfMissing(Cargo.Identifier);
             }
+        }
+
+        public string GetFullPath()
+        {
+            string path = Application.dataPath;
+            string assetPath = AssetDatabase.GetAssetPath(this);
+            path = path + "/" + assetPath.Substring(7);
+            return Path.GetDirectoryName(path);
         }
 
         public void CreateModelSet(CarParentType parentType)
@@ -44,7 +57,7 @@ namespace CC.Unity
             Selection.activeObject = set;
         }
 
-        public void ExportModels()
+        public string? ExportBundle()
         {
             if (_requireConfirm)
             {
@@ -59,84 +72,113 @@ namespace CC.Unity
             {
                 Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
                     "but it's recommended to fix errors first!");
-                return;
+                return null!;
             }
 
             Debug.Log("Exporting cargo...");
 
-            string path = Application.dataPath;
-            string assetPath = AssetDatabase.GetAssetPath(this);
-            path = path + "/" + assetPath.Substring(7);
-            path = Path.GetDirectoryName(path);
+            string path = GetFullPath();
 
             List<string> extraFiles = new List<string>();
             string bundlePath = string.Empty;
 
-            if (Models.Count > 0)
+            // Only make a bundle if there's need for it.
+            if (ShouldMakeBundle)
             {
                 Debug.Log("Building asset bundle...");
-
-                BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(assetPath),
-                    GetAssetBuilds(Models.ToArray()),
-                    BuildAssetBundleOptions.None,
-                    BuildTarget.StandaloneWindows64);
-
-                bundlePath = Directory.EnumerateFiles(path, Constants.ModelBundle, SearchOption.TopDirectoryOnly).First();
+                bundlePath = CreateBundle(path);
                 extraFiles.Add(bundlePath);
             }
 
             // Add icon file if it exists.
-            string extraPath = Path.Combine(path, Constants.Icon);
+            string extraPath = Path.Combine(path, Constants.IconFile);
 
-            if (File.Exists(extraPath))
+            if (Icon == null && File.Exists(extraPath))
             {
                 Debug.Log("Adding icon...");
                 extraFiles.Add(extraPath);
             }
 
             // Same for the resource icon.
-            extraPath = Path.Combine(path, Constants.ResourceIcon);
+            extraPath = Path.Combine(path, Constants.ResourceIconFile);
 
-            if (File.Exists(extraPath))
+            if (ResourceIcon == null && File.Exists(extraPath))
             {
                 Debug.Log("Adding resource icon...");
                 extraFiles.Add(extraPath);
             }
 
             Debug.Log("Zipping cargo mod...");
-            ZipUtility.WriteToZip(Cargo, path, extraFiles.ToArray());
+            var output = ZipUtility.WriteToZip(Cargo, path, extraFiles.ToArray());
 
             if (!string.IsNullOrEmpty(bundlePath))
             {
                 Debug.Log("Cleaning up...");
-                File.Delete(bundlePath);
-                File.Delete(bundlePath + ".manifest");
-
-                // Delete the 2nd bundle too.
-                bundlePath = Path.GetFileName(path);
-                bundlePath = Path.Combine(path, bundlePath);
-
-                File.Delete(bundlePath);
-                File.Delete(bundlePath + ".manifest");
+                DeleteBundle(path, bundlePath);
             }
 
             Debug.Log("Zip created!");
             AssetDatabase.Refresh();
+
+            return output;
         }
 
-        private static AssetBundleBuild[] GetAssetBuilds(params Object[] assets)
+        public string CreateBundle(string path)
         {
-            List<string> names = new List<string>();
+            List<(Object Asset, string? Name)> objs = new List<(Object, string?)>();
 
-            foreach (Object asset in assets)
+            // Add the models, no need to assign names to them.
+            foreach (var model in Models)
             {
-                names.Add(AssetDatabase.GetAssetPath(asset));
+                objs.Add((model, null));
+            }
+
+            // Add the icons
+            if (Icon != null)
+            {
+                objs.Add((Icon, Constants.Icon));
+            }
+
+            if (ResourceIcon != null)
+            {
+                objs.Add((ResourceIcon, Constants.ResourceIcon));
+            }
+
+            BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(AssetDatabase.GetAssetPath(this)),
+                GetAssetBuilds(objs),
+                BuildAssetBundleOptions.None,
+                BuildTarget.StandaloneWindows64);
+
+            return Directory.EnumerateFiles(path, Constants.ModelBundle, SearchOption.TopDirectoryOnly).First();
+        }
+
+        public void DeleteBundle(string path, string bundlePath)
+        {
+            File.Delete(bundlePath);
+            File.Delete(bundlePath + ".manifest");
+
+            // Delete the 2nd bundle too.
+            bundlePath = Path.GetFileName(path);
+            bundlePath = Path.Combine(path, bundlePath);
+
+            File.Delete(bundlePath);
+            File.Delete(bundlePath + ".manifest");
+        }
+
+        private static AssetBundleBuild[] GetAssetBuilds(IEnumerable<(Object Asset, string? Name)> assets)
+        {
+            List<string> paths = new List<string>();
+
+            foreach (var (asset, _) in assets)
+            {
+                paths.Add(AssetDatabase.GetAssetPath(asset));
             }
 
             var build = new AssetBundleBuild
             {
                 assetBundleName = Constants.ModelBundle,
-                assetNames = names.ToArray()
+                assetNames = paths.ToArray(),
+                addressableNames = assets.Select(x => x.Name).ToArray(),
             };
 
             return new[] { build };

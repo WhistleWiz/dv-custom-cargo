@@ -96,8 +96,14 @@ namespace CC.Game
             // Add translations for this cargo.
             AddTranslations(c);
 
+            Sprite? icon = null;
+            Sprite? resourceIcon = null;
+
+            // Try to load any asset bundle.
+            TryLoadBundle(directory, out var models, ref icon, ref resourceIcon);
+
             // Try to load icon files.
-            TryLoadIcons(directory, out var icon, out var resourceIcon);
+            TryLoadIcons(directory, ref icon, ref resourceIcon);
 
             if (icon != null)
             {
@@ -109,16 +115,13 @@ namespace CC.Game
                 v2.resourceIcon = resourceIcon;
             }
 
-            // Try to load any asset bundle with models.
-            TryLoadModels(directory, out var models);
-
             // Add vanilla types to loadable info.
             AddLoadableInfo(c, v2, models);
 
             return true;
         }
 
-        private static bool TryLoadModels(string directory, out ModelsForVanillaCar[] models)
+        private static bool TryLoadBundle(string directory, out ModelsForVanillaCar[] models, ref Sprite? icon, ref Sprite? resourceIcon)
         {
             var assetBundlePath = Path.Combine(directory, Constants.ModelBundle);
 
@@ -126,6 +129,8 @@ namespace CC.Game
             {
                 CCMod.Log($"No model bundle found (expected {assetBundlePath}).");
                 models = null!;
+                icon = null!;
+                resourceIcon = null!;
                 return false;
             }
 
@@ -136,6 +141,8 @@ namespace CC.Game
             {
                 CCMod.Error($"Failed to load model bundle!");
                 models = null!;
+                icon = null!;
+                resourceIcon = null!;
                 return false;
             }
 
@@ -145,6 +152,9 @@ namespace CC.Game
             {
                 CCMod.Error($"No models found in the bundle!");
             }
+
+            icon = assetBundle.LoadAsset<Sprite>(Constants.Icon);
+            resourceIcon = assetBundle.LoadAsset<Sprite>(Constants.ResourceIcon);
 
             foreach (var item in models)
             {
@@ -160,14 +170,14 @@ namespace CC.Game
             return true;
         }
 
-        private static void TryLoadIcons(string directory, out Sprite? icon, out Sprite? resourceIcon)
+        private static void TryLoadIcons(string directory, ref Sprite? icon, ref Sprite? resourceIcon)
         {
             byte[] data;
 
             // Path to the image.
-            var path = Path.Combine(directory, Constants.Icon);
+            var path = Path.Combine(directory, Constants.IconFile);
 
-            if (File.Exists(path))
+            if (icon == null && File.Exists(path))
             {
                 // Shove the raw bytes of the image into the texture.
                 // Texture size is not important and will be automatically changed.
@@ -178,25 +188,17 @@ namespace CC.Game
                 // Create a sprite that covers the whole texture.
                 icon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
             }
-            else
-            {
-                icon = null;
-            }
 
             // Repeat for the resource icon.
-            path = Path.Combine(directory, Constants.ResourceIcon);
+            path = Path.Combine(directory, Constants.ResourceIconFile);
 
-            if (File.Exists(path))
+            if (resourceIcon == null && File.Exists(path))
             {
                 data = File.ReadAllBytes(path);
                 var tex = new Texture2D(2, 2);
                 tex.LoadImage(data);
 
                 resourceIcon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
-            }
-            else
-            {
-                resourceIcon = null;
             }
         }
 
