@@ -7,9 +7,6 @@ namespace CC.Common
     [Serializable]
     public class CustomCargo
     {
-        public const int CUSTOM_TYPE_OFFSET = 0x4000_0000;
-        public const int CUSTOM_TYPE_MASK = CUSTOM_TYPE_OFFSET - 1;
-
         [Tooltip("The name (id) of the cargo")]
         public string Identifier = "MyCargoName";
         [Tooltip("Mass per carload\n" +

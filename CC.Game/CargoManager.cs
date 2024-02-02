@@ -266,10 +266,25 @@ namespace CC.Game
                     }
                 }
 
+                ProcessOriginalPrefabs(prefabs);
                 loadables.Add(new CargoType_v2.LoadableInfo(item.ToV2(), prefabs));
             }
 
             v2.loadableCarTypes = loadables.ToArray();
+        }
+
+        private static void ProcessOriginalPrefabs(GameObject[] prefabs)
+        {
+            for (int i = 0; i < prefabs.Length; i++)
+            {
+                // If one of the prefabs is actually to be replaced...
+                var comp = prefabs[i].GetComponent<UseCargoPrefab>();
+
+                if (comp != null)
+                {
+                    prefabs[i] = CargoPrefab.All[comp.PrefabIndex].ToPrefab();
+                }
+            }
         }
 
         public static CargoType_v2 ToV2(this CustomCargo cargo)

@@ -37,6 +37,11 @@ namespace CC.Unity
             return Path.GetDirectoryName(path);
         }
 
+        private void OnValidate()
+        {
+            _requireConfirm = false;
+        }
+
         public string? Export()
         {
             if (_requireConfirm)
