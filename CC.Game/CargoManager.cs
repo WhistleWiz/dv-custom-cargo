@@ -294,7 +294,7 @@ namespace CC.Game
             var newCargo = ScriptableObject.CreateInstance<CargoType_v2>();
 
             newCargo.id = cargo.Identifier;
-            newCargo.v1 = (CargoType)s_tempValue++;
+            newCargo.v1 = (CargoType)(++s_tempValue);
 
             newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
             newCargo.localizationKeyShort = cargo.LocalizationKeyShort;
