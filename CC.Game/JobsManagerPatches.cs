@@ -31,7 +31,7 @@ namespace CC.Game
 
             s_hasRun = true;
             CCMod.Log("First attempt at job generation started, injecting new routes before it runs...");
-            CCMod.Log(string.Join(", ", SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Keys));
+            CCMod.Log("Stations in map: " + string.Join(", ", SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Keys));
 
             // Inject routes for each cargo the mod loaded.
             foreach (var (custom, v2) in CargoManager.AddedCargos)

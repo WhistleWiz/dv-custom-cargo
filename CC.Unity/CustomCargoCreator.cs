@@ -11,9 +11,9 @@ namespace CC.Unity
     internal class CustomCargoCreator : ScriptableObject
     {
         public CustomCargo Cargo = new CustomCargo();
-        public List<ModelsForVanillaCar> Models = new List<ModelsForVanillaCar>();
         public Sprite? Icon = null;
         public Sprite? ResourceIcon = null;
+        public List<ModelsForVanillaCar> Models = new List<ModelsForVanillaCar>();
 
         private bool _requireConfirm = false;
 

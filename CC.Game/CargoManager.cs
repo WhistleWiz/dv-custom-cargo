@@ -339,6 +339,7 @@ namespace CC.Game
             }
 
             AddedValues = new HashSet<CargoType>();
+            int newTypes = 0;
 
             foreach (var (_, v2) in AddedCargos)
             {
@@ -346,6 +347,7 @@ namespace CC.Game
                 {
                     type = ++highest;
                     Mapping.Add(v2.id, type);
+                    newTypes++;
                 }
 
                 v2.v1 = (CargoType)type;
@@ -354,7 +356,7 @@ namespace CC.Game
 
             // Recalculate caches with the new values.
             Globals.G.Types.RecalculateCaches();
-            CCMod.Log($"Mappings applied: {AddedValues.Count}/{Mapping.Count}, highest is {highest}");
+            CCMod.Log($"Mappings applied: {AddedValues.Count}/{Mapping.Count} (new: {newTypes}), highest value is {highest}");
         }
     }
 }

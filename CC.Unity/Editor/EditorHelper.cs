@@ -8,5 +8,14 @@ namespace CC.Unity.Editor
         {
             public static readonly Color Warning = new Color(2.00f, 1.50f, 0.25f);
         }
+
+        public static void DrawCubeGizmoOutlined(Vector3 position, Vector3 size)
+        {
+            Color c = Gizmos.color;
+            Gizmos.color = new Color(c.r, c.g, c.b, c.a * 0.3f);
+            Gizmos.DrawCube(position, size);
+            Gizmos.color = c;
+            Gizmos.DrawWireCube(position, size);
+        }
     }
 }

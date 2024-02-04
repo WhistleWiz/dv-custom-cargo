@@ -12,7 +12,9 @@ namespace CC.Common
         [Tooltip("Mass per carload\n" +
             "If loading on vanilla cars, use those as a base")]
         public float MassPerUnit = 1000.0f;
+        [Tooltip("How much the cargo is worth")]
         public float FullDamagePrice = 10000.0f;
+        [Tooltip("The environmental fee when the cargo reaches 100% damage")]
         public float EnvironmentDamagePrice = 0.0f;
         [Tooltip("The licenses required to haul this cargo")]
         public BaseGameLicense[] Licenses = new[] { BaseGameLicense.Basic };
