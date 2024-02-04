@@ -20,6 +20,8 @@ namespace CC.Game
         public static Dictionary<string, int> Mapping = new Dictionary<string, int>();
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
 
+        private static int s_tempValue = Constants.DefaultCargoValue;
+
         public static void LoadCargos(UnityModManager.ModEntry mod)
         {
             List<CargoType_v2> newCargos = new List<CargoType_v2>();
@@ -292,7 +294,7 @@ namespace CC.Game
             var newCargo = ScriptableObject.CreateInstance<CargoType_v2>();
 
             newCargo.id = cargo.Identifier;
-            newCargo.v1 = (CargoType)Constants.DefaultCargoValue;
+            newCargo.v1 = (CargoType)s_tempValue++;
 
             newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
             newCargo.localizationKeyShort = cargo.LocalizationKeyShort;
