@@ -24,7 +24,7 @@ namespace CC.Common
                 serializer.Formatting = Formatting.Indented;
 
                 // Create the mod info file, and write the usual stuff in it.
-                var file = archive.CreateEntry(Path.Combine(fileName, Constants.ModInfo));
+                var file = archive.CreateEntry($"{fileName}/{Constants.ModInfo}");
 
                 using (var entryStream = file.Open())
                 using (var streamWriter = new StreamWriter(entryStream))
@@ -34,7 +34,7 @@ namespace CC.Common
                 }
 
                 // Create the cargo file, and serialize the CustomCargo into it.
-                file = archive.CreateEntry(Path.Combine(fileName, Constants.CargoFile));
+                file = archive.CreateEntry($"{fileName}/{Constants.CargoFile}");
 
                 using (var entryStream = file.Open())
                 using (var streamWriter = new StreamWriter(entryStream))
@@ -46,7 +46,7 @@ namespace CC.Common
                 // Include extra files into the zip.
                 foreach (var item in extraFilePaths)
                 {
-                    file = archive.CreateEntryFromFile(item, Path.Combine(fileName, Path.GetFileName(item)));
+                    file = archive.CreateEntryFromFile(item, $"{fileName}/{Path.GetFileName(item)}");
                 }
             }
 

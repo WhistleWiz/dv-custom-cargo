@@ -82,7 +82,7 @@ namespace CC.Unity
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Formatting = Formatting.Indented;
 
-                var file = archive.CreateEntry(Path.Combine(fileName, Constants.ModInfo));
+                var file = archive.CreateEntry($"{fileName}/{Constants.ModInfo}");
 
                 using (var entryStream = file.Open())
                 using (var streamWriter = new StreamWriter(entryStream))
@@ -94,7 +94,7 @@ namespace CC.Unity
                 foreach (var c in Cargos)
                 {
                     // Create the cargo file, and serialize the CustomCargo into it.
-                    file = archive.CreateEntry(Path.Combine(fileName, c.Cargo.Identifier, Constants.CargoFile));
+                    file = archive.CreateEntry($"{fileName}/{c.Cargo.Identifier}/{Constants.CargoFile}");
 
                     using (var entryStream = file.Open())
                     using (var streamWriter = new StreamWriter(entryStream))
@@ -136,7 +136,7 @@ namespace CC.Unity
                     // Include extra files into the zip.
                     foreach (var item in extraFiles)
                     {
-                        file = archive.CreateEntryFromFile(item, Path.Combine(fileName, c.Cargo.Identifier, Path.GetFileName(item)));
+                        file = archive.CreateEntryFromFile(item, $"{fileName}/{c.Cargo.Identifier}/{Path.GetFileName(item)}");
                     }
 
                     if (!string.IsNullOrEmpty(bundlePath))

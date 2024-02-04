@@ -65,13 +65,11 @@ namespace CC.Unity.Editor
             {
                 if (DrawIntersections)
                 {
+                    Gizmos.color = DrawColour;
+
                     if (Physics.CheckBox(Position, Size))
                     {
                         Gizmos.color = ErrorColour;
-                    }
-                    else
-                    {
-                        Gizmos.color = DrawColour;
                     }
                 }
 
