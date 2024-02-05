@@ -10,6 +10,12 @@ namespace CC.Game
     {
         public static void InjectRoutes(CustomCargo cc, CargoType_v2 ct)
         {
+            if (ct.loadableCarTypes.Length == 0)
+            {
+                CCMod.Error("Cargo has no loadable car types! Skipping injection...");
+                return;
+            }
+
             // Find the stations where we need to inject new routes.
             var srcStations = new List<StationController>();
             var destStations = new List<StationController>();
