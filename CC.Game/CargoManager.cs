@@ -322,6 +322,13 @@ namespace CC.Game
                     continue;
                 }
 
+                // Don't include it either if there's no wagon to load it.
+                if (cargo.loadableCarTypes.Length == 0)
+                {
+                    CCMod.Error($"Cargo '{item}' cannot be loaded on any car (cargo group for '{cargoName}')");
+                    continue;
+                }
+
                 types.Add(cargo.v1);
             }
 
