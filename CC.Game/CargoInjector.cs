@@ -99,5 +99,68 @@ namespace CC.Game
                 controller.supportedCargoTypes.Add(cargo);
             }
         }
+
+        public static void InjectEffects(CustomCargo cc, CargoType_v2 ct)
+        {
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Oils))
+            {
+                TrainCarAndCargoDamageProperties.Oils.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Liquids))
+            {
+                TrainCarAndCargoDamageProperties.Liquids.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.FlammableLiquids))
+            {
+                TrainCarAndCargoDamageProperties.FlammableLiquids.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.CorrosiveLiquids))
+            {
+                TrainCarAndCargoDamageProperties.CorosiveLiquids.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Gases))
+            {
+                TrainCarAndCargoDamageProperties.Gases.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.FlammableGases))
+            {
+                TrainCarAndCargoDamageProperties.FlammableGases.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.ExtiguishingGases))
+            {
+                TrainCarAndCargoDamageProperties.ExtinguishingGases.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.FlammableSolids))
+            {
+                TrainCarAndCargoDamageProperties.FlammableSolids.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.RadioactiveCargo))
+            {
+                TrainCarAndCargoDamageProperties.RadioactiveCargo.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.ExplosiveCargo))
+            {
+                TrainCarAndCargoDamageProperties.ExplosiveCargo.Add(ct.v1);
+            }
+
+            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Oxidizers))
+            {
+                TrainCarAndCargoDamageProperties.Oxidizers.Add(ct.v1);
+            }
+        }
+
+        public static void InjectLeakProperties(CustomCargo cc, CargoType_v2 ct)
+        {
+
+        }
     }
 }
