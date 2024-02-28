@@ -14,6 +14,7 @@ namespace CC.Game
 
         internal static void ExtractDataFromSaveGame(SaveGameData data)
         {
+            StateManager.RequestUnload();
             LoadedData = data.GetJObject(Constants.SaveKey);
 
             if (LoadedData != null)
