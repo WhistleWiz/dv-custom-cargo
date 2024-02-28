@@ -13,6 +13,7 @@
         public const string LangHelper = "DVLangHelper";
         public const string MainModId = "DVCustomCargo";
         public const string ModIdPrefix = "CC_";
+        public const string CCL = "DVCustomCarLoader";
 
         // Localization.
         public const string LocalizeRoot = "customcargo";

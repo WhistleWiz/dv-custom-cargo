@@ -209,6 +209,13 @@ namespace CC.Unity
 
         private static JObject GetModInfo(CustomCargoPack c)
         {
+            List<string> reqs = new List<string> { Constants.MainModId };
+
+            if (c.Cargos.Any(x => x.Cargo.RequireCCL))
+            {
+                reqs.Add(Constants.CCL);
+            }
+
             var modInfo = new JObject
             {
                 { "Id", c.PackId },
@@ -216,7 +223,7 @@ namespace CC.Unity
                 { "Version", c.Version },
                 { "Author", c.Author },
                 { "ManagerVersion", "0.27.3" },
-                { "Requirements", JToken.FromObject(new[] { Constants.MainModId }) },
+                { "Requirements", JToken.FromObject(reqs.ToArray()) },
             };
 
             // If a homepage was defined, also add the link.
