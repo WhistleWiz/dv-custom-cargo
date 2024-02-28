@@ -21,6 +21,7 @@ namespace CC.Game
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
 
         private static int s_tempValue = Constants.DefaultCargoValue;
+        private static AssetBundle? s_commonBundle;
 
         public static void LoadCargos(UnityModManager.ModEntry mod)
         {
@@ -49,6 +50,13 @@ namespace CC.Game
                 {
                     newCargos.Add(customCargo);
                 }
+            }
+
+            // Unload the common bundle at the end.
+            if (s_commonBundle != null)
+            {
+                s_commonBundle.Unload(false);
+                s_commonBundle = null;
             }
 
             // If we did load any cargo...
@@ -102,7 +110,7 @@ namespace CC.Game
             Sprite? resourceIcon = null;
 
             // Try to load any asset bundle.
-            TryLoadBundle(directory, out var models, ref icon, ref resourceIcon);
+            TryLoadBundle(c, directory, out var models, ref icon, ref resourceIcon);
 
             // Try to load icon files.
             TryLoadIcons(directory, ref icon, ref resourceIcon);
@@ -123,21 +131,41 @@ namespace CC.Game
             return true;
         }
 
-        private static bool TryLoadBundle(string directory, out ModelsForVanillaCar[] models, ref Sprite? icon, ref Sprite? resourceIcon)
+        private static bool TryLoadBundle(CustomCargo c, string directory, out ModelsForVanillaCar[] models, ref Sprite? icon, ref Sprite? resourceIcon)
         {
             var assetBundlePath = Path.Combine(directory, Constants.ModelBundle);
+            var commonPath = Path.Combine(Path.GetDirectoryName(directory), Constants.ModelBundle);
+            bool usingCommon = false;
+            AssetBundle assetBundle;
 
             if (!File.Exists(assetBundlePath))
             {
-                CCMod.Log($"No model bundle found (expected {assetBundlePath}).");
-                models = null!;
-                icon = null!;
-                resourceIcon = null!;
-                return false;
+                if (s_commonBundle != null)
+                {
+                    assetBundle = s_commonBundle;
+                    usingCommon = true;
+                }
+                else if (File.Exists(commonPath))
+                {
+                    CCMod.Log($"Loading common model bundle...");
+                    s_commonBundle = AssetBundle.LoadFromFile(commonPath);
+                    assetBundle = s_commonBundle;
+                    usingCommon = true;
+                }
+                else
+                {
+                    CCMod.Log($"No model bundle found (expected {assetBundlePath} or {commonPath}).");
+                    models = null!;
+                    icon = null!;
+                    resourceIcon = null!;
+                    return false;
+                }
             }
-
-            CCMod.Log($"Loading model bundle...");
-            var assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+            else
+            {
+                CCMod.Log($"Loading model bundle...");
+                assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+            }
 
             if (assetBundle == null)
             {
@@ -148,15 +176,31 @@ namespace CC.Game
                 return false;
             }
 
-            models = assetBundle.LoadAllAssets<ModelsForVanillaCar>();
-
-            if (models.Length == 0)
+            if (usingCommon)
             {
-                CCMod.Error($"No models found in the bundle!");
-            }
+                var target = assetBundle.LoadAllAssets<CommonCargoObject>().FirstOrDefault(x => x.Identifier == c.Identifier);
 
-            icon = assetBundle.LoadAsset<Sprite>(Constants.Icon);
-            resourceIcon = assetBundle.LoadAsset<Sprite>(Constants.ResourceIcon);
+                if (target == null)
+                {
+                    models = null!;
+                    icon = null!;
+                    resourceIcon = null!;
+                    CCMod.Error($"There was no cargo {c.Identifier} in the common bundle!");
+                    return false;
+                }
+
+                models = target.Models.ToArray();
+                icon = target.Icon;
+                resourceIcon = target.ResourceIcon;
+            }
+            else
+            {
+                models = assetBundle.LoadAllAssets<ModelsForVanillaCar>();
+                icon = assetBundle.LoadAsset<Sprite>(Constants.Icon);
+                resourceIcon = assetBundle.LoadAsset<Sprite>(Constants.ResourceIcon);
+
+                assetBundle.Unload(false);
+            }
 
             foreach (var item in models)
             {
@@ -166,8 +210,6 @@ namespace CC.Game
                     // the proxy system on custom cargo.
                 }
             }
-
-            assetBundle.Unload(false);
 
             return true;
         }
@@ -280,9 +322,7 @@ namespace CC.Game
             for (int i = 0; i < prefabs.Length; i++)
             {
                 // If one of the prefabs is actually to be replaced...
-                var comp = prefabs[i].GetComponent<UseCargoPrefab>();
-
-                if (comp != null)
+                if (prefabs[i].TryGetComponent<UseCargoPrefab>(out var comp))
                 {
                     prefabs[i] = CargoPrefab.All[comp.PrefabIndex].ToPrefab();
                 }

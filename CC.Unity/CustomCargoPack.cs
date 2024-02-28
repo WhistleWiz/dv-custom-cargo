@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,6 +23,9 @@ namespace CC.Unity
         public string? Repository;
         [Tooltip("The cargos you want to include in this pack")]
         public List<CustomCargoCreator> Cargos = new List<CustomCargoCreator>();
+        [Space]
+        [Tooltip("Packs everything into a single bundle instead individual bundles for every cargo")]
+        public bool UseSingleBundle = true;
         
         private bool _requireConfirm = false;
 
@@ -105,15 +109,6 @@ namespace CC.Unity
 
                     List<string> extraFiles = new List<string>();
                     string cargoPath = c.GetFullPath();
-                    string bundlePath = string.Empty;
-
-                    // Only make a bundle if there's need for it.
-                    if (c.ShouldMakeBundle)
-                    {
-                        Debug.Log($"Building asset bundle for {c.name}...");
-                        bundlePath = c.CreateBundle(cargoPath);
-                        extraFiles.Add(bundlePath);
-                    }
 
                     // Add icon file if it exists.
                     string extraPath = Path.Combine(cargoPath, Constants.IconFile);
@@ -133,17 +128,63 @@ namespace CC.Unity
                         extraFiles.Add(extraPath);
                     }
 
-                    // Include extra files into the zip.
-                    foreach (var item in extraFiles)
+                    if (!UseSingleBundle)
                     {
-                        file = archive.CreateEntryFromFile(item, $"{fileName}/{c.Cargo.Identifier}/{Path.GetFileName(item)}");
+                        string bundlePath = string.Empty;
+
+                        // Only make a bundle if there's need for it.
+                        if (c.ShouldMakeBundle)
+                        {
+                            Debug.Log($"Building asset bundle for {c.name}...");
+                            bundlePath = AssetBundleHelper.CreateBundle(cargoPath, AssetBundleHelper.GetAssetPath(c), c.GetBundleAssets());
+                            extraFiles.Add(bundlePath);
+                        }
+
+                        // Include extra files into the zip.
+                        foreach (var item in extraFiles)
+                        {
+                            file = archive.CreateEntryFromFile(item, $"{fileName}/{c.Cargo.Identifier}/{Path.GetFileName(item)}");
+                        }
+
+                        if (!string.IsNullOrEmpty(bundlePath))
+                        {
+                            Debug.Log($"Cleaning up {c.name}...");
+                            AssetBundleHelper.DeleteBundle(cargoPath, bundlePath);
+                        }
+                    }
+                }
+
+                if (UseSingleBundle)
+                {
+                    Debug.Log($"Building asset bundle for {PackName}...");
+                    var commons = Cargos.Select(x => x.ToCommon());
+                    var localPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(this));
+                    var assets = new List<(Object Asset, string? Name)>();
+
+                    // Create physical assets.
+                    foreach (var common in commons)
+                    {
+                        AssetDatabase.CreateAsset(common, $"{localPath}/__{common.Identifier}.asset");
+                        assets.Add((common, common.Identifier));
                     }
 
-                    if (!string.IsNullOrEmpty(bundlePath))
+                    AssetDatabase.SaveAssets();
+
+                    string path = GetFullPath();
+                    string bundlePath = AssetBundleHelper.CreateBundle(path, AssetBundleHelper.GetAssetPath(this), assets);
+
+                    file = archive.CreateEntryFromFile(bundlePath, $"{fileName}/{Path.GetFileName(bundlePath)}");
+
+                    Debug.Log($"Cleaning up {PackName}...");
+                    AssetBundleHelper.DeleteBundle(path, bundlePath);
+
+                    // Destroy the temporary assets.
+                    foreach (var common in commons)
                     {
-                        Debug.Log($"Cleaning up {c.name}...");
-                        c.DeleteBundle(cargoPath, bundlePath);
+                        AssetDatabase.DeleteAsset($"{localPath}/__{common.Identifier}.asset");
                     }
+
+                    AssetDatabase.SaveAssets();
                 }
             }
 

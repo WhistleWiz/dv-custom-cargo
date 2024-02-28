@@ -1,7 +1,6 @@
 ﻿using CC.Common;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -52,7 +51,7 @@ namespace CC.Unity
             EditorUtility.SetDirty(this);
             AssetDatabase.CreateAsset(set, $"{path}/{Cargo.Identifier.Replace(" ", "_")}_{parentType}.asset");
             AssetDatabase.SaveAssets();
-
+            
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = set;
         }
@@ -86,7 +85,7 @@ namespace CC.Unity
             if (ShouldMakeBundle)
             {
                 Debug.Log("Building asset bundle...");
-                bundlePath = CreateBundle(path);
+                bundlePath = AssetBundleHelper.CreateBundle(path, AssetBundleHelper.GetAssetPath(this), GetBundleAssets());
                 extraFiles.Add(bundlePath);
             }
 
@@ -114,7 +113,7 @@ namespace CC.Unity
             if (!string.IsNullOrEmpty(bundlePath))
             {
                 Debug.Log("Cleaning up...");
-                DeleteBundle(path, bundlePath);
+                AssetBundleHelper.DeleteBundle(path, bundlePath);
             }
 
             Debug.Log("Zip created!");
@@ -123,14 +122,14 @@ namespace CC.Unity
             return output;
         }
 
-        public string CreateBundle(string path)
+        public List<(Object Asset, string? Name)> GetBundleAssets()
         {
             List<(Object Asset, string? Name)> objs = new List<(Object, string?)>();
 
             // Add the models, no need to assign names to them.
             foreach (var model in Models)
             {
-                objs.Add((model, null));
+                objs.Add((model, model.GetAssetAdressable(Cargo.Identifier)));
             }
 
             // Add the icons
@@ -144,44 +143,19 @@ namespace CC.Unity
                 objs.Add((ResourceIcon, Constants.ResourceIcon));
             }
 
-            BuildPipeline.BuildAssetBundles(Path.GetDirectoryName(AssetDatabase.GetAssetPath(this)),
-                GetAssetBuilds(objs),
-                BuildAssetBundleOptions.None,
-                BuildTarget.StandaloneWindows64);
-
-            return Directory.EnumerateFiles(path, Constants.ModelBundle, SearchOption.TopDirectoryOnly).First();
+            return objs;
         }
 
-        public void DeleteBundle(string path, string bundlePath)
+        public CommonCargoObject ToCommon()
         {
-            File.Delete(bundlePath);
-            File.Delete(bundlePath + ".manifest");
+            var common = CreateInstance<CommonCargoObject>();
 
-            // Delete the 2nd bundle too.
-            bundlePath = Path.GetFileName(path);
-            bundlePath = Path.Combine(path, bundlePath);
+            common.Identifier = Cargo.Identifier;
+            common.Icon = Icon;
+            common.ResourceIcon = ResourceIcon;
+            common.Models = Models;
 
-            File.Delete(bundlePath);
-            File.Delete(bundlePath + ".manifest");
-        }
-
-        private static AssetBundleBuild[] GetAssetBuilds(IEnumerable<(Object Asset, string? Name)> assets)
-        {
-            List<string> paths = new List<string>();
-
-            foreach (var (asset, _) in assets)
-            {
-                paths.Add(AssetDatabase.GetAssetPath(asset));
-            }
-
-            var build = new AssetBundleBuild
-            {
-                assetBundleName = Constants.ModelBundle,
-                assetNames = paths.ToArray(),
-                addressableNames = assets.Select(x => x.Name).ToArray(),
-            };
-
-            return new[] { build };
+            return common;
         }
     }
 }

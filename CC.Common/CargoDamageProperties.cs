@@ -18,10 +18,17 @@ namespace CC.Common
 
         private void OnValidate()
         {
-            if (!Enum.IsDefined(typeof(CargoEffectPools), CargoEffectPools))
+            CargoEffectPools cep = CargoEffectPools.None;
+
+            foreach (CargoEffectPools item in Enum.GetValues(typeof(CargoEffectPools)))
             {
-                CargoEffectPools = CargoEffectPools.None;
+                if (CargoEffectPools.HasFlag(item))
+                {
+                    cep |= item;
+                }
             }
+
+            CargoEffectPools = cep;
         }
     }
 }
