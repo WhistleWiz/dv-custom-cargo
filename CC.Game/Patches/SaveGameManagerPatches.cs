@@ -1,19 +1,17 @@
 ﻿using HarmonyLib;
 
-namespace CC.Game
+namespace CC.Game.Patches
 {
     [HarmonyPatch(typeof(SaveGameManager))]
     internal class SaveGameManagerPatches
     {
-        [HarmonyPatch("DoSaveIO")]
-        [HarmonyPrefix]
+        [HarmonyPrefix, HarmonyPatch("DoSaveIO")]
         public static void InjectSaveData(SaveGameData data)
         {
             SaveInjector.InjectDataIntoSaveGame(data);
         }
 
-        [HarmonyPatch(nameof(SaveGameManager.FindStartGameData))]
-        [HarmonyPostfix]
+        [HarmonyPostfix, HarmonyPatch(nameof(SaveGameManager.FindStartGameData))]
         public static void ExtractSaveData(SaveGameManager __instance)
         {
             SaveInjector.LoadedData = null;

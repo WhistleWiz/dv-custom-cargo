@@ -40,8 +40,7 @@ namespace CC.Common
         [Tooltip("If this cargo can be loaded on a vanilla wagon (Optional)")]
         public CarParentType[] VanillaTypesToLoad = new CarParentType[0];
 
-        [Tooltip("The reaction effects of this cargo with other things")]
-        public CargoEffectPools CargoEffectPools = CargoEffectPools.None;
+        public CargoDamageProperties Properties = null!;
 
         [Tooltip("Your name, probably")]
         public string Author = string.Empty;
@@ -53,10 +52,5 @@ namespace CC.Common
 
         public string LocalizationKeyFull => $"{Constants.LocalizeRoot}/{Identifier.Replace(" ", "_").ToLowerInvariant()}";
         public string LocalizationKeyShort => $"{Constants.LocalizeRoot}/{Identifier.Replace(" ", "_").ToLowerInvariant()}_short";
-
-        public CustomCargoGroup GetDefaultCargoGroup()
-        {
-            return new CustomCargoGroup(Identifier);
-        }
     }
 }

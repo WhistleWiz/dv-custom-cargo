@@ -18,8 +18,13 @@ namespace CC.Game
         private HashSet<CargoType> _extinguishingGases;
         private HashSet<CargoType> _oxidizers;
 
+        private Dictionary<CargoType, CargoDamageProperties> _cargoDamageProperties;
+        private Dictionary<CargoType, CargoReactionProperties> _cargoReactionProperties;
+        private Dictionary<CargoType, CargoLeakProperties> _cargoLeakProperties;
+
         public OriginalCargoDefinitions()
         {
+            // Ensure we get a copy, not the original.
             _liquids = TrainCarAndCargoDamageProperties.Liquids.ToHashSet();
             _oils = TrainCarAndCargoDamageProperties.Oils.ToHashSet();
             _flammableLiquids = TrainCarAndCargoDamageProperties.FlammableLiquids.ToHashSet();
@@ -31,6 +36,10 @@ namespace CC.Game
             _explosiveCargo = TrainCarAndCargoDamageProperties.ExplosiveCargo.ToHashSet();
             _extinguishingGases = TrainCarAndCargoDamageProperties.ExtinguishingGases.ToHashSet();
             _oxidizers = TrainCarAndCargoDamageProperties.Oxidizers.ToHashSet();
+
+            _cargoDamageProperties = TrainCarAndCargoDamageProperties.CargoDamageProperties.ToDictionary(k => k.Key, v => v.Value);
+            _cargoReactionProperties = TrainCarAndCargoDamageProperties.CargoReactionProperties.ToDictionary(k => k.Key, v => v.Value);
+            _cargoLeakProperties = TrainCarAndCargoDamageProperties.CargoLeakProperties.ToDictionary(k => k.Key, v => v.Value);
         }
 
         public void ResetToThis()
@@ -46,6 +55,10 @@ namespace CC.Game
             TrainCarAndCargoDamageProperties.ExplosiveCargo = _explosiveCargo.ToHashSet();
             TrainCarAndCargoDamageProperties.ExtinguishingGases = _extinguishingGases.ToHashSet();
             TrainCarAndCargoDamageProperties.Oxidizers = _oxidizers.ToHashSet();
+
+            TrainCarAndCargoDamageProperties.CargoDamageProperties = _cargoDamageProperties.ToDictionary(k => k.Key, v => v.Value);
+            TrainCarAndCargoDamageProperties.CargoReactionProperties = _cargoReactionProperties.ToDictionary(k => k.Key, v => v.Value);
+            TrainCarAndCargoDamageProperties.CargoLeakProperties = _cargoLeakProperties.ToDictionary(k => k.Key, v => v.Value);
         }
     }
 }

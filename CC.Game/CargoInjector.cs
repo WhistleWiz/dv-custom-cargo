@@ -1,14 +1,65 @@
 ﻿using CC.Common;
+using CC.Common.Effects;
 using DV.ThingTypes;
 using DV.Utils;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace CC.Game
 {
     internal static class CargoInjector
     {
-        public static void InjectRoutes(CustomCargo cc, CargoType_v2 ct)
+        public static void StartInjection()
+        {
+            // Only run once per load.
+            if (StateManager.IsInjected)
+            {
+                CCMod.Log("Already injected, returning...");
+                return;
+            }
+
+            CCMod.Log("First attempt at job generation started, injecting new routes before it runs...");
+            CCMod.Log("Stations in map: " + string.Join(", ", SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Keys));
+
+            foreach (var (custom, v2) in CargoManager.AddedCargos)
+            {
+                // Inject routes for each cargo the mod loaded.
+                CCMod.Log($"Injecting routes for cargo '{v2.id}'...");
+                InjectRoutes(custom, v2);
+
+                if (custom.Properties != null)
+                {
+                    // Inject cargo effects into the caches.
+                    CCMod.Log($"Injecting effects for cargo '{v2.id}'...");
+                    InjectEffects(custom, v2);
+                }
+            }
+
+            RemakeStationToCarTypeCache();
+
+            StateManager.IsInjected = true;
+        }
+
+        private static void RemakeStationToCarTypeCache()
+        {
+            CCMod.Log("Remaking station to car type mapping...");
+            Dictionary<StationController, HashSet<TrainCarType_v2>> s2ct = new Dictionary<StationController, HashSet<TrainCarType_v2>>();
+
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            var type = SingletonBehaviour<LogicController>.Instance.GetType();
+            var original = type.GetField("stationToSupportedCarTypes", flags);
+            var method = type.GetMethod("GetCarTypesThatStationUses", flags);
+
+            foreach (var item in SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Values)
+            {
+                s2ct.Add(item, (HashSet<TrainCarType_v2>)method.Invoke(SingletonBehaviour<LogicController>.Instance, new[] { item }));
+            }
+
+            original.SetValue(SingletonBehaviour<LogicController>.Instance, s2ct);
+        }
+
+        private static void InjectRoutes(CustomCargo cc, CargoType_v2 ct)
         {
             if (ct.loadableCarTypes.Length == 0)
             {
@@ -100,67 +151,63 @@ namespace CC.Game
             }
         }
 
-        public static void InjectEffects(CustomCargo cc, CargoType_v2 ct)
+        private static void InjectEffects(CustomCargo cc, CargoType_v2 ct)
         {
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Oils))
+            // Add the cargo to the corresponding pools.
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.Oils))
             {
                 TrainCarAndCargoDamageProperties.Oils.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Liquids))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.Liquids))
             {
                 TrainCarAndCargoDamageProperties.Liquids.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.FlammableLiquids))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.FlammableLiquids))
             {
                 TrainCarAndCargoDamageProperties.FlammableLiquids.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.CorrosiveLiquids))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.CorrosiveLiquids))
             {
                 TrainCarAndCargoDamageProperties.CorosiveLiquids.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Gases))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.Gases))
             {
                 TrainCarAndCargoDamageProperties.Gases.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.FlammableGases))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.FlammableGases))
             {
                 TrainCarAndCargoDamageProperties.FlammableGases.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.ExtiguishingGases))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.ExtiguishingGases))
             {
                 TrainCarAndCargoDamageProperties.ExtinguishingGases.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.FlammableSolids))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.FlammableSolids))
             {
                 TrainCarAndCargoDamageProperties.FlammableSolids.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.RadioactiveCargo))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.RadioactiveCargo))
             {
                 TrainCarAndCargoDamageProperties.RadioactiveCargo.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.ExplosiveCargo))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.ExplosiveCargo))
             {
                 TrainCarAndCargoDamageProperties.ExplosiveCargo.Add(ct.v1);
             }
 
-            if (cc.CargoEffectPools.HasFlag(CargoEffectPools.Oxidizers))
+            if (cc.Properties.CargoEffectPools.HasFlag(CargoEffectPools.Oxidizers))
             {
                 TrainCarAndCargoDamageProperties.Oxidizers.Add(ct.v1);
             }
-        }
-
-        public static void InjectLeakProperties(CustomCargo cc, CargoType_v2 ct)
-        {
-
         }
     }
 }

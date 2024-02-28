@@ -3,7 +3,7 @@ using HarmonyLib;
 using System;
 using System.Linq;
 
-namespace CC.Game
+namespace CC.Game.Patches
 {
     [HarmonyPatch(typeof(Enum))]
     internal static class EnumPatches
@@ -11,8 +11,7 @@ namespace CC.Game
         // Thanks Passenger Jobs mod!
 
         // Extend the array of actual values with the ones added by the mod.
-        [HarmonyPatch(nameof(Enum.GetValues))]
-        [HarmonyPostfix]
+        [HarmonyPostfix, HarmonyPatch(nameof(Enum.GetValues))]
         public static void GetValuesPostfix(Type enumType, ref Array __result)
         {
             if (enumType == typeof(CargoType))
@@ -30,14 +29,13 @@ namespace CC.Game
         }
 
         // Consider values defined by the mod as valid enum values.
-        [HarmonyPatch(nameof(Enum.IsDefined))]
-        [HarmonyPrefix]
+        [HarmonyPrefix, HarmonyPatch(nameof(Enum.IsDefined))]
         public static bool IsDefinedPrefix(Type enumType, object value, ref bool __result)
         {
             if (enumType == typeof(CargoType))
             {
-                if (((value is int iVal) && CargoManager.AddedValues.Contains((CargoType)iVal)) ||
-                    ((value is CargoType cVal) && CargoManager.AddedValues.Contains(cVal)))
+                if (value is int iVal && CargoManager.AddedValues.Contains((CargoType)iVal) ||
+                    value is CargoType cVal && CargoManager.AddedValues.Contains(cVal))
                 {
                     __result = true;
                     return false;
