@@ -4,7 +4,8 @@ using DV;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DVLangHelper.Data;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +17,14 @@ namespace CC.Game
 {
     internal static class CargoManager
     {
+        private class CargoConverter : CustomCreationConverter<CustomCargo>
+        {
+            public override CustomCargo Create(Type objectType)
+            {
+                return new CustomCargo { Properties = ScriptableObject.CreateInstance<Common.CargoDamageProperties>() };
+            }
+        }
+
         public static HashSet<CargoType> AddedValues = new HashSet<CargoType>();
         public static Dictionary<string, int> Mapping = new Dictionary<string, int>();
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
@@ -30,13 +39,13 @@ namespace CC.Game
             // Find the 'cargo.json' files.
             foreach (string jsonPath in Directory.EnumerateFiles(mod.Path, Constants.CargoFile, SearchOption.AllDirectories))
             {
-                JObject json;
+                CustomCargo? c;
 
                 try
                 {
                     using (StreamReader reader = File.OpenText(jsonPath))
                     {
-                        json = JObject.Parse(reader.ReadToEnd());
+                        c = JsonConvert.DeserializeObject<CustomCargo>(reader.ReadToEnd(), new CargoConverter());
                     }
                 }
                 catch (Exception ex)
@@ -45,8 +54,15 @@ namespace CC.Game
                     continue;
                 }
 
+                // Something is wrong with the file.
+                if (c == null)
+                {
+                    CCMod.Error($"Could not load cargo from file '{jsonPath}'");
+                    continue;
+                }
+
                 // Try to load the cargo if we have one of those files.
-                if (TryLoadCargo(jsonPath, json, out var customCargo))
+                if (TryLoadCargo(jsonPath, c, out var customCargo))
                 {
                     newCargos.Add(customCargo);
                 }
@@ -71,18 +87,9 @@ namespace CC.Game
             }
         }
 
-        private static bool TryLoadCargo(string jsonPath, JObject json, out CargoType_v2 v2)
+        private static bool TryLoadCargo(string jsonPath, CustomCargo c, out CargoType_v2 v2)
         {
-            CustomCargo? c = json.ToObject<CustomCargo>();
             var directory = Path.GetDirectoryName(jsonPath);
-
-            // Something is wrong with the file.
-            if (c == null)
-            {
-                CCMod.Error($"Could not load cargo from file '{jsonPath}'");
-                v2 = null!;
-                return false;
-            }
 
             // Handle duplicate names (not).
             if (Globals.G.Types.cargos.Any(x => x.id == c.Identifier))
