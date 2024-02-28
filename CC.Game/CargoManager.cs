@@ -3,6 +3,7 @@ using CC.Game;
 using DV;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
+using DV.UI;
 using DVLangHelper.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -79,11 +80,7 @@ namespace CC.Game
             if (newCargos.Count > 0)
             {
                 CCMod.Log($"Loaded {newCargos.Count} cargos from {mod.Path}");
-
-                foreach (var item in newCargos)
-                {
-                    CCMod.Log($"{item.id}");
-                }
+                CCMod.Log(string.Join(", ", newCargos.Select(x => x.id)));
             }
         }
 
@@ -209,15 +206,6 @@ namespace CC.Game
                 assetBundle.Unload(false);
             }
 
-            foreach (var item in models)
-            {
-                foreach (var prefab in item.Prefabs)
-                {
-                    // Ask CCL to handle some model loading here, so we can support
-                    // the proxy system on custom cargo.
-                }
-            }
-
             return true;
         }
 
@@ -332,6 +320,11 @@ namespace CC.Game
                 if (prefabs[i].TryGetComponent<UseCargoPrefab>(out var comp))
                 {
                     prefabs[i] = CargoPrefab.All[comp.PrefabIndex].ToPrefab();
+                }
+                else if (ConnectCCL.LoadedCCL)
+                {
+                    // If the prefab won't be replaced, do CCL processing.
+                    ConnectCCL.ProcessPrefab(prefabs[i]);
                 }
             }
         }
