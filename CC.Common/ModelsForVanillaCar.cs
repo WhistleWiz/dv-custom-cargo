@@ -7,5 +7,7 @@ namespace CC.Common
     {
         public CarParentType CarType;
         public GameObject[] Prefabs = new GameObject[0];
+
+        public string GetAssetAdressable(string mainId) => $"{mainId}_{CarType}";
     }
 }

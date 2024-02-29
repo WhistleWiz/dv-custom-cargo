@@ -3,8 +3,10 @@ using CC.Game;
 using DV;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
+using DV.UI;
 using DVLangHelper.Data;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,11 +18,20 @@ namespace CC.Game
 {
     internal static class CargoManager
     {
+        private class CargoConverter : CustomCreationConverter<CustomCargo>
+        {
+            public override CustomCargo Create(Type objectType)
+            {
+                return new CustomCargo { Properties = ScriptableObject.CreateInstance<Common.CargoDamageProperties>() };
+            }
+        }
+
         public static HashSet<CargoType> AddedValues = new HashSet<CargoType>();
         public static Dictionary<string, int> Mapping = new Dictionary<string, int>();
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
 
         private static int s_tempValue = Constants.DefaultCargoValue;
+        private static AssetBundle? s_commonBundle;
 
         public static void LoadCargos(UnityModManager.ModEntry mod)
         {
@@ -29,13 +40,13 @@ namespace CC.Game
             // Find the 'cargo.json' files.
             foreach (string jsonPath in Directory.EnumerateFiles(mod.Path, Constants.CargoFile, SearchOption.AllDirectories))
             {
-                JObject json;
+                CustomCargo? c;
 
                 try
                 {
                     using (StreamReader reader = File.OpenText(jsonPath))
                     {
-                        json = JObject.Parse(reader.ReadToEnd());
+                        c = JsonConvert.DeserializeObject<CustomCargo>(reader.ReadToEnd(), new CargoConverter());
                     }
                 }
                 catch (Exception ex)
@@ -44,37 +55,38 @@ namespace CC.Game
                     continue;
                 }
 
+                // Something is wrong with the file.
+                if (c == null)
+                {
+                    CCMod.Error($"Could not load cargo from file '{jsonPath}'");
+                    continue;
+                }
+
                 // Try to load the cargo if we have one of those files.
-                if (TryLoadCargo(jsonPath, json, out var customCargo))
+                if (TryLoadCargo(jsonPath, c, out var customCargo))
                 {
                     newCargos.Add(customCargo);
                 }
+            }
+
+            // Unload the common bundle at the end.
+            if (s_commonBundle != null)
+            {
+                s_commonBundle.Unload(false);
+                s_commonBundle = null;
             }
 
             // If we did load any cargo...
             if (newCargos.Count > 0)
             {
                 CCMod.Log($"Loaded {newCargos.Count} cargos from {mod.Path}");
-
-                foreach (var item in newCargos)
-                {
-                    CCMod.Log($"{item.id}");
-                }
+                CCMod.Log(string.Join(", ", newCargos.Select(x => x.id)));
             }
         }
 
-        private static bool TryLoadCargo(string jsonPath, JObject json, out CargoType_v2 v2)
+        private static bool TryLoadCargo(string jsonPath, CustomCargo c, out CargoType_v2 v2)
         {
-            CustomCargo? c = json.ToObject<CustomCargo>();
             var directory = Path.GetDirectoryName(jsonPath);
-
-            // Something is wrong with the file.
-            if (c == null)
-            {
-                CCMod.Error($"Could not load cargo from file '{jsonPath}'");
-                v2 = null!;
-                return false;
-            }
 
             // Handle duplicate names (not).
             if (Globals.G.Types.cargos.Any(x => x.id == c.Identifier))
@@ -102,7 +114,7 @@ namespace CC.Game
             Sprite? resourceIcon = null;
 
             // Try to load any asset bundle.
-            TryLoadBundle(directory, out var models, ref icon, ref resourceIcon);
+            TryLoadBundle(c, directory, out var models, ref icon, ref resourceIcon);
 
             // Try to load icon files.
             TryLoadIcons(directory, ref icon, ref resourceIcon);
@@ -123,21 +135,41 @@ namespace CC.Game
             return true;
         }
 
-        private static bool TryLoadBundle(string directory, out ModelsForVanillaCar[] models, ref Sprite? icon, ref Sprite? resourceIcon)
+        private static bool TryLoadBundle(CustomCargo c, string directory, out ModelsForVanillaCar[] models, ref Sprite? icon, ref Sprite? resourceIcon)
         {
             var assetBundlePath = Path.Combine(directory, Constants.ModelBundle);
+            var commonPath = Path.Combine(Path.GetDirectoryName(directory), Constants.ModelBundle);
+            bool usingCommon = false;
+            AssetBundle assetBundle;
 
             if (!File.Exists(assetBundlePath))
             {
-                CCMod.Log($"No model bundle found (expected {assetBundlePath}).");
-                models = null!;
-                icon = null!;
-                resourceIcon = null!;
-                return false;
+                if (s_commonBundle != null)
+                {
+                    assetBundle = s_commonBundle;
+                    usingCommon = true;
+                }
+                else if (File.Exists(commonPath))
+                {
+                    CCMod.Log($"Loading common model bundle...");
+                    s_commonBundle = AssetBundle.LoadFromFile(commonPath);
+                    assetBundle = s_commonBundle;
+                    usingCommon = true;
+                }
+                else
+                {
+                    CCMod.Log($"No model bundle found (expected {assetBundlePath} or {commonPath}).");
+                    models = null!;
+                    icon = null!;
+                    resourceIcon = null!;
+                    return false;
+                }
             }
-
-            CCMod.Log($"Loading model bundle...");
-            var assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+            else
+            {
+                CCMod.Log($"Loading model bundle...");
+                assetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+            }
 
             if (assetBundle == null)
             {
@@ -148,26 +180,31 @@ namespace CC.Game
                 return false;
             }
 
-            models = assetBundle.LoadAllAssets<ModelsForVanillaCar>();
-
-            if (models.Length == 0)
+            if (usingCommon)
             {
-                CCMod.Error($"No models found in the bundle!");
-            }
+                var target = assetBundle.LoadAllAssets<CommonCargoObject>().FirstOrDefault(x => x.Identifier == c.Identifier);
 
-            icon = assetBundle.LoadAsset<Sprite>(Constants.Icon);
-            resourceIcon = assetBundle.LoadAsset<Sprite>(Constants.ResourceIcon);
-
-            foreach (var item in models)
-            {
-                foreach (var prefab in item.Prefabs)
+                if (target == null)
                 {
-                    // Ask CCL to handle some model loading here, so we can support
-                    // the proxy system on custom cargo.
+                    models = null!;
+                    icon = null!;
+                    resourceIcon = null!;
+                    CCMod.Error($"There was no cargo {c.Identifier} in the common bundle!");
+                    return false;
                 }
-            }
 
-            assetBundle.Unload(false);
+                models = target.Models.ToArray();
+                icon = target.Icon;
+                resourceIcon = target.ResourceIcon;
+            }
+            else
+            {
+                models = assetBundle.LoadAllAssets<ModelsForVanillaCar>();
+                icon = assetBundle.LoadAsset<Sprite>(Constants.Icon);
+                resourceIcon = assetBundle.LoadAsset<Sprite>(Constants.ResourceIcon);
+
+                assetBundle.Unload(false);
+            }
 
             return true;
         }
@@ -280,11 +317,14 @@ namespace CC.Game
             for (int i = 0; i < prefabs.Length; i++)
             {
                 // If one of the prefabs is actually to be replaced...
-                var comp = prefabs[i].GetComponent<UseCargoPrefab>();
-
-                if (comp != null)
+                if (prefabs[i].TryGetComponent<UseCargoPrefab>(out var comp))
                 {
                     prefabs[i] = CargoPrefab.All[comp.PrefabIndex].ToPrefab();
+                }
+                else if (ConnectCCL.LoadedCCL)
+                {
+                    // If the prefab won't be replaced, do CCL processing.
+                    ConnectCCL.ProcessPrefab(prefabs[i]);
                 }
             }
         }

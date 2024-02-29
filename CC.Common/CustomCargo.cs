@@ -1,5 +1,6 @@
 ﻿using DVLangHelper.Data;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CC.Common
@@ -49,8 +50,22 @@ namespace CC.Common
         public string? HomePage;
         [Tooltip("Add a repository link here to be able to automatically update your cargo (Optional)")]
         public string? Repository;
+        [Tooltip("If you have included CCL components in the models, use this checkbox to add CCL to the mod requirements")]
+        public bool RequireCCL = false;
 
         public string LocalizationKeyFull => $"{Constants.LocalizeRoot}/{Identifier.Replace(" ", "_").ToLowerInvariant()}";
         public string LocalizationKeyShort => $"{Constants.LocalizeRoot}/{Identifier.Replace(" ", "_").ToLowerInvariant()}_short";
+
+        public string[] GetRequirements()
+        {
+            List<string> reqs = new List<string> { Constants.MainModId };
+
+            if (RequireCCL)
+            {
+                reqs.Add(Constants.CCL);
+            }
+
+            return reqs.ToArray();
+        }
     }
 }

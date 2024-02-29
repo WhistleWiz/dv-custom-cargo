@@ -78,7 +78,7 @@ namespace CC.Common
                 { "Version", c.Version },
                 { "Author", c.Author },
                 { "ManagerVersion", "0.27.3" },
-                { "Requirements", JToken.FromObject(new[] { Constants.MainModId }) },
+                { "Requirements", JToken.FromObject(c.GetRequirements()) },
             };
 
             // If a homepage was defined, also add the link.

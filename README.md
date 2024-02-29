@@ -51,6 +51,7 @@ Big thanks to previous work done on CCL and Passenger Jobs for providing the bas
 ## Known Bugs
 
 * [WON'T FIX] When changing the amount of cargo (adding or removing a mod), hazmat map data is lost (visuals in the world)
+* [FIXED FOR NEXT VERSION] Cargo doesn't load properly when reloading a save, needs to go back to the menu first.
 
 
 
