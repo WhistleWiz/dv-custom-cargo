@@ -7,15 +7,22 @@ namespace CC.Common
     [Serializable]
     public class CargoHazmatProperties
     {
-        public DamageProperties DamageProperties = new DamageProperties();
+        public float MaxHealth = 8000f;
+        public float DamageTolerance = 0.01f;
+        public float DamageMultiplier = 1f;
+        public float DamageResistance = 50.0f;
+        public float FireDamageMultiplier = 1f;
+        public float FireResistance = 7.5f;
 
         [Tooltip("The reaction effects of this cargo with other things")]
         public CargoEffectPools CargoEffectPools = CargoEffectPools.None;
-        [Space]
+
+        [Header("Leak Properties - Optional")]
         [Tooltip("How this cargo leaks")]
         public CargoLeakCurve LeakCurve = CargoLeakCurve.None;
         public LeakProperties LeakProperties = new LeakProperties();
-        [Space]
+
+        [Header("Reaction Properties - Optional")]
         [Tooltip("How the reaction happens")]
         public HazmatReaction Reaction = HazmatReaction.None;
         [Tooltip("The reaction curve if set to custom")]
@@ -57,19 +64,8 @@ namespace CC.Common
                 }
             }
         }
-    }
 
-    [Serializable]
-    public class DamageProperties
-    {
-        public float MaxHealth;
-        public float DamageTolerance;
-        public float DamageMultiplier;
-        public float DamageResistance;
-        public float FireDamageMultiplier;
-        public float FireResistance;
-
-        public DamageProperties()
+        public void ResetDamageProperties()
         {
             MaxHealth = 8000f;
             DamageTolerance = 0.01f;

@@ -157,7 +157,7 @@ namespace CC.Game
 
         private static void InjectProperties(CustomCargo cc, CargoType_v2 ct)
         {
-            TrainCarAndCargoDamageProperties.CargoDamageProperties.Add(ct.v1, cc.Properties.DamageProperties.ToDV());
+            TrainCarAndCargoDamageProperties.CargoDamageProperties.Add(ct.v1, cc.Properties.ToDV());
             TrainCarAndCargoDamageProperties.CargoLeakProperties.Add(ct.v1, cc.Properties.LeakProperties.ToDV());
             TrainCarAndCargoDamageProperties.CargoReactionProperties.Add(ct.v1, cc.Properties.ReactionProperties.ToDV());
         }

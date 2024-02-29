@@ -23,7 +23,7 @@ namespace CC.Game
             return null!;
         }
 
-        public static CargoDamageProperties ToDV(this DamageProperties properties)
+        public static CargoDamageProperties ToDV(this CargoHazmatProperties properties)
         {
             return new CargoDamageProperties(
                 properties.MaxHealth,

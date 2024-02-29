@@ -68,7 +68,7 @@ namespace CC.Unity.Editor
                     {
                         if (GUILayout.Button("Reset Damage Properties"))
                         {
-                            _ccc.Cargo.Properties.DamageProperties = new DamageProperties();
+                            _ccc.Cargo.Properties.ResetDamageProperties();
                             Save();
                         }
 
