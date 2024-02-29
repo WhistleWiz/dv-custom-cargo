@@ -17,8 +17,6 @@ namespace CC.Common
         public float FullDamagePrice = 10000.0f;
         [Tooltip("The environmental fee when the cargo reaches 100% damage")]
         public float EnvironmentDamagePrice = 0.0f;
-        [Tooltip("The licenses required to haul this cargo")]
-        public BaseGameLicense[] Licenses = new[] { BaseGameLicense.Basic };
 
         [Tooltip("Link to a CSV file to dynamically load translations (Optional)")]
         public string? CSVLink;
@@ -41,7 +39,10 @@ namespace CC.Common
         [Tooltip("If this cargo can be loaded on a vanilla wagon (Optional)")]
         public CarParentType[] VanillaTypesToLoad = new CarParentType[0];
 
-        public CargoDamageProperties Properties = null!;
+        [Tooltip("The licenses required to haul this cargo")]
+        public BaseGameLicense[] Licenses = new BaseGameLicense[0];
+
+        public CargoHazmatProperties Properties = new CargoHazmatProperties();
 
         [Tooltip("Your name, probably")]
         public string Author = string.Empty;
