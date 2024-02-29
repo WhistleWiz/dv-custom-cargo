@@ -34,20 +34,72 @@ namespace CC.Unity.Editor
 
             while (current.Next(false))
             {
+                if (current.name == nameof(CustomCargo.CSVLink))
+                {
+                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    EditorGUILayout.LabelField("Translation", EditorStyles.boldLabel);
+                }
+                else if (current.name == nameof(CustomCargo.SourceStations))
+                {
+                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    EditorGUILayout.LabelField("Loading", EditorStyles.boldLabel);
+                }
+                else if (current.name == nameof(CustomCargo.Properties))
+                {
+                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    EditorGUILayout.LabelField("Damage and Hazmat", EditorStyles.boldLabel);
+                }
+                else if (current.name == nameof(CustomCargo.Author))
+                {
+                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    EditorGUILayout.LabelField("Mod Info", EditorStyles.boldLabel);
+                }
+                else if (current.name == nameof(CustomCargoCreator.Icon))
+                {
+                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    EditorGUILayout.LabelField("Visuals", EditorStyles.boldLabel);
+                }
+
                 EditorGUILayout.PropertyField(current);
+
+                if (current.name == nameof(CustomCargo.Properties))
+                {
+                    if (current.isExpanded)
+                    {
+                        if (GUILayout.Button("Reset Damage Properties"))
+                        {
+                            _ccc.Cargo.Properties.DamageProperties = new DamageProperties();
+                            Save();
+                        }
+
+                        if (GUILayout.Button("Reset Leak Properties"))
+                        {
+                            _ccc.Cargo.Properties.LeakProperties = new LeakProperties();
+                            Save();
+                        }
+
+                        if (GUILayout.Button("Reset Reaction Properties"))
+                        {
+                            _ccc.Cargo.Properties.ReactionProperties = new ReactionProperties();
+                            Save();
+                        }
+                    }
+                }
             }
 
-            EditorGUILayout.Space();
             EditorGUILayout.BeginHorizontal();
 
-            TypeForNewSet = (CarParentType)EditorGUILayout.EnumPopup("Car Type", TypeForNewSet);
-
-            if (GUILayout.Button(s_createAddContent))
+            using (new EditorGUI.IndentLevelScope())
             {
-                _ccc.CreateModelSet(TypeForNewSet);
-            }
+                TypeForNewSet = (CarParentType)EditorGUILayout.EnumPopup("Car Type", TypeForNewSet);
 
-            EditorGUILayout.EndHorizontal();
+                if (GUILayout.Button(s_createAddContent))
+                {
+                    _ccc.CreateModelSet(TypeForNewSet);
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
@@ -69,6 +121,12 @@ namespace CC.Unity.Editor
             }
 
             GUI.backgroundColor = Color.white;
+        }
+
+        private void Save()
+        {
+            EditorUtility.SetDirty(_ccc);
+            AssetDatabase.SaveAssets();
         }
     }
 }

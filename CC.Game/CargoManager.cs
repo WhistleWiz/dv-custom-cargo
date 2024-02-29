@@ -3,7 +3,6 @@ using CC.Game;
 using DV;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
-using DV.UI;
 using DVLangHelper.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -18,14 +17,6 @@ namespace CC.Game
 {
     internal static class CargoManager
     {
-        private class CargoConverter : CustomCreationConverter<CustomCargo>
-        {
-            public override CustomCargo Create(Type objectType)
-            {
-                return new CustomCargo { Properties = ScriptableObject.CreateInstance<Common.CargoDamageProperties>() };
-            }
-        }
-
         public static HashSet<CargoType> AddedValues = new HashSet<CargoType>();
         public static Dictionary<string, int> Mapping = new Dictionary<string, int>();
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
@@ -46,7 +37,7 @@ namespace CC.Game
                 {
                     using (StreamReader reader = File.OpenText(jsonPath))
                     {
-                        c = JsonConvert.DeserializeObject<CustomCargo>(reader.ReadToEnd(), new CargoConverter());
+                        c = JsonConvert.DeserializeObject<CustomCargo>(reader.ReadToEnd());
                     }
                 }
                 catch (Exception ex)

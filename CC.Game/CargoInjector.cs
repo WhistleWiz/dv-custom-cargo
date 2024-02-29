@@ -28,9 +28,13 @@ namespace CC.Game
                 CCMod.Log($"Injecting routes for cargo '{v2.id}'...");
                 InjectRoutes(custom, v2);
 
-                if (custom.Properties != null)
+                // Inject the properties into the caches.
+                CCMod.Log($"Injecting properties for cargo '{v2.id}'...");
+                InjectProperties(custom, v2);
+
+                if (custom.Properties.CargoEffectPools != CargoEffectPools.None)
                 {
-                    // Inject cargo effects into the caches.
+                    // Inject cargo effects into the caches if the cargo is in a pool.
                     CCMod.Log($"Injecting effects for cargo '{v2.id}'...");
                     InjectEffects(custom, v2);
                 }
@@ -149,6 +153,13 @@ namespace CC.Game
                 machine.SupportedCargoTypes.Add(cargo);
                 controller.supportedCargoTypes.Add(cargo);
             }
+        }
+
+        private static void InjectProperties(CustomCargo cc, CargoType_v2 ct)
+        {
+            TrainCarAndCargoDamageProperties.CargoDamageProperties.Add(ct.v1, cc.Properties.DamageProperties.ToDV());
+            TrainCarAndCargoDamageProperties.CargoLeakProperties.Add(ct.v1, cc.Properties.LeakProperties.ToDV());
+            TrainCarAndCargoDamageProperties.CargoReactionProperties.Add(ct.v1, cc.Properties.ReactionProperties.ToDV());
         }
 
         private static void InjectEffects(CustomCargo cc, CargoType_v2 ct)

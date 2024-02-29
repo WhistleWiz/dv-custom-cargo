@@ -22,5 +22,38 @@ namespace CC.Game
 
             return null!;
         }
+
+        public static CargoDamageProperties ToDV(this DamageProperties properties)
+        {
+            return new CargoDamageProperties(
+                properties.MaxHealth,
+                properties.DamageTolerance,
+                properties.DamageMultiplier,
+                properties.DamageResistance,
+                properties.FireDamageMultiplier,
+                properties.FireResistance);
+        }
+
+        public static CargoLeakProperties ToDV(this LeakProperties properties)
+        {
+            return new CargoLeakProperties(
+                properties.MaxLeakFlow,
+                properties.MinLeakFlow,
+                properties.Volatility,
+                properties.DissipationRate,
+                properties.Density);
+        }
+
+        public static CargoReactionProperties ToDV(this ReactionProperties properties)
+        {
+            return new CargoReactionProperties(
+                properties.Reactivity,
+                properties.ReactivityModifierToOthers,
+                properties.IgnitionReactivityMin,
+                properties.IgnitionReactivityMax,
+                properties.CriticalVolumeIgnitionMin,
+                properties.CriticalVolumeIgnitionMax,
+                properties.ExplosionDelay);
+        }
     }
 }
