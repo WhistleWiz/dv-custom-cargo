@@ -1,48 +1,66 @@
 ﻿using CC.Common;
 using System.Linq;
-using UnityEngine;
 
 namespace CC.Unity.Validation
 {
     internal class CargoValidator
     {
-        public static bool ValidateCargo(CustomCargoCreator cargo)
+        public static ValidationResult ValidateCargo(CustomCargoCreator cargo)
         {
+            ValidationResult result = new ValidationResult();
             CustomCargo c = cargo.Cargo;
 
             if (c.TranslationDataFull != null &&
                 c.TranslationDataFull.Items.Any(x => string.IsNullOrEmpty(x.Value)))
             {
-                Debug.LogWarning("Translation Data Full has empty translations!");
-                return false;
+                result.ScaleToWarning($"{cargo.name} - Translation Data Full has empty translations!");
             }
 
             if (c.TranslationDataShort != null &&
                 c.TranslationDataShort.Items.Any(x => string.IsNullOrEmpty(x.Value)))
             {
-                Debug.LogWarning("Translation Data Short has empty translations!");
-                return false;
+                result.ScaleToWarning($"{cargo.name} - Translation Data Short has empty translations!");
             }
 
             if (c.SourceStations.Length < 1)
             {
-                Debug.LogWarning("Cargo has no source stations!");
-                return false;
+                result.ScaleToWarning($"{cargo.name} - No source stations!");
             }
 
             if (c.DestinationStations.Length < 1)
             {
-                Debug.LogWarning("Cargo has no destination stations!");
-                return false;
+                result.ScaleToWarning($"{cargo.name} - No destination stations!");
             }
 
-            if (cargo.Models.Any(x => !c.VanillaTypesToLoad.Contains(x.CarType)))
+            foreach (var model in cargo.Models)
             {
-                Debug.LogWarning("There's a cargo model that won't be loaded into a wagon!");
-                return false;
+                if (!c.VanillaTypesToLoad.Contains(model.CarType))
+                {
+                    result.ScaleToWarning($"{cargo.name} - Car type {model.CarType} is not setup to be loaded!");
+                }
+
+                foreach (var prefab in model.Prefabs)
+                {
+                    if (!prefab.GetComponent<UseCargoPrefab>())
+                    {
+                        if (prefab.GetComponentInChildren<UseCargoPrefab>())
+                        {
+                            result.ScaleToFailure($"{prefab.name} - Found UseCargoPrefab but it's not in the root object!");
+                        }
+
+                        if (!prefab.transform.Find(Constants.CollidersRoot))
+                        {
+                            result.ScaleToFailure($"{prefab.name} - Missing [colliders] child!");
+                        }
+                        else if (!prefab.transform.Find(Constants.CollidersCollision))
+                        {
+                            result.ScaleToFailure($"{prefab.name} - Missing [collision] child in [colliders]!");
+                        }
+                    }
+                }
             }
 
-            return true;
+            return result;
         }
     }
 }

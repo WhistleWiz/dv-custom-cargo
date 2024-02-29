@@ -58,21 +58,27 @@ namespace CC.Unity
 
                 foreach (var cargo in Cargos)
                 {
-                    if (!Validation.CargoValidator.ValidateCargo(cargo))
+                    var result = Validation.CargoValidator.ValidateCargo(cargo);
+                    _requireConfirm = result.RequireConfirm;
+
+                    if (_requireConfirm)
                     {
-                        _requireConfirm = true;
-                        break;
+                        if (result.Failed)
+                        {
+                            Debug.LogError("Cargo failed validation!");
+                            _requireConfirm = false;
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
+                                "but it's recommended to fix errors first!");
+                        }
+
+                        result.Log();
+                        return null!;
                     }
                 }
             }
-
-            if (_requireConfirm)
-            {
-                Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
-                    "but it's recommended to fix errors first!");
-                return null!;
-            }
-
 
             Debug.Log("Exporting cargo...");
 

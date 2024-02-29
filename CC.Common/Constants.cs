@@ -25,5 +25,9 @@
         // Misc.
         public const int DefaultCargoValue = 10000;
         public const string SaveKey = "dv_custom_cargo";
+
+        // Structure.
+        public const string CollidersRoot = "[colliders]";
+        public const string CollidersCollision = "[colliders]/[collision]";
     }
 }
