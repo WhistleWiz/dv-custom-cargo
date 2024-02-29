@@ -30,6 +30,8 @@ namespace CC.Unity
             {
                 group.AddIdIfMissing(Cargo.Identifier);
             }
+
+            Cargo.Properties.OnValidate();
         }
 
         public string GetFullPath()

@@ -22,7 +22,7 @@ namespace CC.Common
         public AnimationCurve CustomReactionCurve = new AnimationCurve();
         public ReactionProperties ReactionProperties = new ReactionProperties();
 
-        internal void OnValidate()
+        public void OnValidate()
         {
             // Force cargo pools to be in the valid options.
             CargoEffectPools cep = CargoEffectPools.None;
@@ -87,7 +87,7 @@ namespace CC.Common
         public float MinLeakFlow;
         public float Volatility;
         public float DissipationRate;
-        public float InverseDensity;
+        public float Density;
 
         public LeakProperties()
         {
@@ -95,7 +95,7 @@ namespace CC.Common
             MinLeakFlow = 100.0f;
             Volatility = 0.0f;
             DissipationRate = 0.0f;
-            InverseDensity = 0.0f;
+            Density = 0.0f;
         }
     }
 
