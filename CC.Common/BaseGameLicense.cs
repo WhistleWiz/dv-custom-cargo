@@ -2,7 +2,6 @@
 {
     public enum BaseGameLicense
     {
-        Basic           = 0,
         Hazmat1         = 1,
         Hazmat2         = 2,
         Hazmat3         = 4,
