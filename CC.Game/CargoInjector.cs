@@ -28,7 +28,7 @@ namespace CC.Game
                 CCMod.Log($"Injecting routes for cargo '{v2.id}'...");
                 InjectRoutes(custom, v2);
 
-                if (custom.Properties != null)
+                if (custom.Properties != null && custom.Properties.CargoEffectPools != CargoEffectPools.None)
                 {
                     // Inject cargo effects into the caches.
                     CCMod.Log($"Injecting effects for cargo '{v2.id}'...");
