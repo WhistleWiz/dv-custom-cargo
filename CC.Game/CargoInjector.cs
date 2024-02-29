@@ -1,5 +1,6 @@
 ﻿using CC.Common;
 using CC.Common.Effects;
+using DV.Localization;
 using DV.ThingTypes;
 using DV.Utils;
 using System.Collections.Generic;
@@ -123,7 +124,7 @@ namespace CC.Game
                         destStations));
                 }
 
-                AddCargoToWarehouse(station, ct.v1);
+                AddCargoToWarehouse(station, ct);
             }
 
             foreach (var station in destStations)
@@ -135,11 +136,11 @@ namespace CC.Game
                         srcStations));
                 }
 
-                AddCargoToWarehouse(station, ct.v1);
+                AddCargoToWarehouse(station, ct);
             }
         }
 
-        private static void AddCargoToWarehouse(StationController station, CargoType cargo)
+        private static void AddCargoToWarehouse(StationController station, CargoType_v2 cargo)
         {
             // Grab only one warehouse machine at the station.
             CCMod.Log($"Adding cargo to station warehouse: '{station.name}'");
@@ -150,9 +151,22 @@ namespace CC.Game
                 // Get the controller for the machine we are using.
                 var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
                 // Add the cargo to the list of supported cargos.
-                machine.SupportedCargoTypes.Add(cargo);
-                controller.supportedCargoTypes.Add(cargo);
+                machine.SupportedCargoTypes.Add(cargo.v1);
+                controller.supportedCargoTypes.Add(cargo.v1);
+                InjectCargoName(controller, cargo);
+                controller.UpdateScreen();
             }
+        }
+
+        private static void InjectCargoName(WarehouseMachineController controller, CargoType_v2 cargo)
+        {
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            var type = typeof(WarehouseMachineController);
+            var original = type.GetField("supportedCargoTypesText", flags);
+
+            string text = LocalizationAPI.L(cargo.localizationKeyFull, new string[0]);
+
+            original.SetValue(controller, $"{(string)original.GetValue(controller)}{text}\n");
         }
 
         private static void InjectProperties(CustomCargo cc, CargoType_v2 ct)

@@ -22,6 +22,7 @@
 		<Reference Include="UnityEngine.UI" />
 		<Reference Include="DVLangHelper.Data" />
 		<Reference Include="DVLangHelper.Runtime" />
+		<Reference Include="DV.Localization" />
 		<Reference Include="DV.ThingTypes" />
 		<Reference Include="DV.Utils" />
 	</ItemGroup>
