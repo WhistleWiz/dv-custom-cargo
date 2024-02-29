@@ -30,6 +30,26 @@ namespace CC.Common
             }
 
             CargoEffectPools = cep;
+
+            // If leak curve is none, force it to be liquid or gas if the cargo
+            // is in certain pools.
+            if (LeakCurve == CargoLeakCurve.None)
+            {
+                if (CargoEffectPools.HasFlag(CargoEffectPools.Gases) ||
+                    CargoEffectPools.HasFlag(CargoEffectPools.FlammableGases) ||
+                    CargoEffectPools.HasFlag(CargoEffectPools.ExtiguishingGases))
+                {
+                    LeakCurve = CargoLeakCurve.Gas;
+                }
+
+                if (CargoEffectPools.HasFlag(CargoEffectPools.Oils) ||
+                    CargoEffectPools.HasFlag(CargoEffectPools.Liquids) ||
+                    CargoEffectPools.HasFlag(CargoEffectPools.FlammableLiquids) ||
+                    CargoEffectPools.HasFlag(CargoEffectPools.CorrosiveLiquids))
+                {
+                    LeakCurve = CargoLeakCurve.Liquid;
+                }
+            }
         }
     }
 }
