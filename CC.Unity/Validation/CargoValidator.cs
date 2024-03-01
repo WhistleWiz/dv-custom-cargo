@@ -22,14 +22,17 @@ namespace CC.Unity.Validation
                 result.ScaleToWarning($"{cargo.name} - Translation Data Short has empty translations!");
             }
 
-            if (c.SourceStations.Length < 1)
+            foreach (var group in c.CargoGroups)
             {
-                result.ScaleToWarning($"{cargo.name} - No source stations!");
-            }
+                if (group.SourceStations.Length < 1)
+                {
+                    result.ScaleToWarning($"{cargo.name} - Cargo group has no source stations!");
+                }
 
-            if (c.DestinationStations.Length < 1)
-            {
-                result.ScaleToWarning($"{cargo.name} - No destination stations!");
+                if (group.DestinationStations.Length < 1)
+                {
+                    result.ScaleToWarning($"{cargo.name} - Cargo group has no destination stations!");
+                }
             }
 
             foreach (var model in cargo.Models)
