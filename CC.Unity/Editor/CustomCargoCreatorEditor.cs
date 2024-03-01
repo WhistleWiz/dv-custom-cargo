@@ -31,6 +31,7 @@ namespace CC.Unity.Editor
             // Iterate through the properties manually so it doesn't show up as 2 dropdowns.
             SerializedProperty current = _cargo.FindPropertyRelative(nameof(CustomCargo.Identifier));
             EditorGUILayout.PropertyField(current);
+            bool modelsExpanded = false;
 
             while (current.Next(false))
             {
@@ -39,10 +40,10 @@ namespace CC.Unity.Editor
                     EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                     EditorGUILayout.LabelField("Translation", EditorStyles.boldLabel);
                 }
-                else if (current.name == nameof(CustomCargo.SourceStations))
+                else if (current.name == nameof(CustomCargo.CargoGroups))
                 {
                     EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-                    EditorGUILayout.LabelField("Loading", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("Jobs", EditorStyles.boldLabel);
                 }
                 else if (current.name == nameof(CustomCargo.Properties))
                 {
@@ -85,20 +86,24 @@ namespace CC.Unity.Editor
                         }
                     }
                 }
+
+                modelsExpanded = current.isExpanded;
             }
 
-            EditorGUILayout.BeginHorizontal();
-
-            using (new EditorGUI.IndentLevelScope())
+            if (modelsExpanded)
             {
-                TypeForNewSet = (CarParentType)EditorGUILayout.EnumPopup("Car Type", TypeForNewSet);
-
-                if (GUILayout.Button(s_createAddContent))
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    _ccc.CreateModelSet(TypeForNewSet);
-                }
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        TypeForNewSet = (CarParentType)EditorGUILayout.EnumPopup("Car Type", TypeForNewSet);
 
-                EditorGUILayout.EndHorizontal();
+                        if (GUILayout.Button(s_createAddContent))
+                        {
+                            _ccc.CreateModelSet(TypeForNewSet);
+                        }
+                    }
+                }
             }
 
             EditorGUILayout.Space();

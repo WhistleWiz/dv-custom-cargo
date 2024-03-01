@@ -2,6 +2,7 @@
 using CC.Common.Effects;
 using DV.Localization;
 using DV.ThingTypes;
+using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,83 +74,87 @@ namespace CC.Game
                 return;
             }
 
-            // Find the stations where we need to inject new routes.
-            var srcStations = new List<StationController>();
-            var srcTracks = new List<string>();
-            var destStations = new List<StationController>();
-            var destTracks = new List<string>();
-
-            foreach (var source in cc.SourceStations)
+            foreach (var group in cc.CargoGroups)
             {
-                var yard = GetStationName(source);
+                CCMod.Log($"Group: {string.Join(", ", group.CargosIds)}");
 
-                if (!LogicController.Instance.YardIdToStationController.TryGetValue(yard, out var station))
+                // Find the stations where we need to inject new routes.
+                var srcStations = new List<StationController>();
+                var srcTracks = new List<string>();
+                var destStations = new List<StationController>();
+                var destTracks = new List<string>();
+
+                foreach (var source in group.SourceStations)
                 {
-                    CCMod.Warning($"Could not find source station '{yard}' for cargo '{cc.Identifier}' " +
-                        $"(is vanilla: {Helper.IsVanillaStation(yard)})!");
-                    continue;
+                    var yard = GetStationName(source);
+
+                    if (!LogicController.Instance.YardIdToStationController.TryGetValue(yard, out var station))
+                    {
+                        CCMod.Warning($"Could not find source station '{yard}' for cargo '{cc.Identifier}' " +
+                            $"(is vanilla: {Helper.IsVanillaStation(yard)})!");
+                        continue;
+                    }
+
+                    srcStations.Add(station);
+                    srcTracks.Add(source);
                 }
 
-                srcStations.Add(station);
-                srcTracks.Add(source);
-            }
+                // We only need each station once, even if it supports multiple tracks.
+                srcStations = srcStations.Distinct().ToList();
 
-            srcStations = srcStations.Distinct().ToList();
-
-            foreach (var destination in cc.DestinationStations)
-            {
-                var yard = GetStationName(destination);
-
-                if (!LogicController.Instance.YardIdToStationController.TryGetValue(yard, out var station))
+                foreach (var destination in group.DestinationStations)
                 {
-                    CCMod.Warning($"Could not find destination station '{yard}' for cargo '{cc.Identifier}' " +
-                        $"(is vanilla: {Helper.IsVanillaStation(yard)})!");
-                    continue;
+                    var yard = GetStationName(destination);
+
+                    if (!LogicController.Instance.YardIdToStationController.TryGetValue(yard, out var station))
+                    {
+                        CCMod.Warning($"Could not find destination station '{yard}' for cargo '{cc.Identifier}' " +
+                            $"(is vanilla: {Helper.IsVanillaStation(yard)})!");
+                        continue;
+                    }
+
+                    destStations.Add(station);
+                    destTracks.Add(destination);
                 }
 
-                destStations.Add(station);
-                destTracks.Add(destination);
-            }
+                destStations = destStations.Distinct().ToList();
 
-            destStations = destStations.Distinct().ToList();
-
-            // If there's no source or destination stations, don't add any routes.
-            if (srcStations.Count == 0)
-            {
-                CCMod.Error("Cargo has no source stations! Skipping injection...");
-                return;
-            }
-
-            if (destStations.Count == 0)
-            {
-                CCMod.Error("Cargo has no destination stations! Skipping injection...");
-                return;
-            }
-
-            // Add each cargo group to each source station, then also add
-            // the cargo to the station's warehouse machine.
-            foreach (var station in srcStations)
-            {
-                foreach (var group in cc.CargoGroups)
+                // If there's no source or destination stations, don't add any routes.
+                if (srcStations.Count == 0)
                 {
-                    station.proceduralJobsRuleset.outputCargoGroups.Add(new CargoGroup(
-                        CargoManager.ToCargoTypeGroup(group, cc.Identifier),
-                        destStations));
+                    CCMod.Error("Cargo has no source stations! Skipping injection...");
+                    return;
                 }
 
-                AddCargoToWarehouses(station, srcTracks, ct);
-            }
-
-            foreach (var station in destStations)
-            {
-                foreach (var group in cc.CargoGroups)
+                if (destStations.Count == 0)
                 {
-                    station.proceduralJobsRuleset.inputCargoGroups.Add(new CargoGroup(
-                        CargoManager.ToCargoTypeGroup(group, cc.Identifier),
-                        srcStations));
+                    CCMod.Error("Cargo has no destination stations! Skipping injection...");
+                    return;
                 }
 
-                AddCargoToWarehouses(station, destTracks, ct);
+                // Add the cargo group to each source station, then also add
+                // the cargos in it to the station's warehouse machine.
+                var ctgroup = CargoManager.ToCargoTypeGroup(group, cc.Identifier);
+
+                foreach (var station in srcStations)
+                {
+                    station.proceduralJobsRuleset.outputCargoGroups.Add(new CargoGroup(ctgroup, destStations));
+
+                    foreach (var v1 in ctgroup)
+                    {
+                        AddCargoToWarehouses(station, srcTracks, v1);
+                    }
+                }
+
+                foreach (var station in destStations)
+                {
+                    station.proceduralJobsRuleset.inputCargoGroups.Add(new CargoGroup(ctgroup, srcStations));
+
+                    foreach (var v1 in ctgroup)
+                    {
+                        AddCargoToWarehouses(station, destTracks, v1);
+                    }
+                }
             }
         }
 
@@ -163,12 +168,12 @@ namespace CC.Game
             return string.Join("-", splits.Take(Mathf.Max(1, splits.Length - 1)));
         }
 
-        private static void AddCargoToWarehouses(StationController station, List<string> tracksToLoad, CargoType_v2 cargo)
+        private static void AddCargoToWarehouses(StationController station, List<string> tracksToLoad, CargoType cargo)
         {
             // Add cargo to all machines...
             foreach (var machine in station.logicStation.yard.WarehouseMachines)
             {
-                if (machine != null)
+                if (machine != null && !machine.SupportedCargoTypes.Contains(cargo))
                 {
                     var id = machine.WarehouseTrack.ID.FullDisplayID;
 
@@ -178,14 +183,16 @@ namespace CC.Game
                         continue;
                     }
 
-                    CCMod.Log($"Adding cargo to station warehouse at {id}");
+                    var v2 = cargo.ToV2();
+
+                    CCMod.Log($"Adding cargo '{v2.id}' to station warehouse at {id}");
 
                     // Get the controller for the machine we are using.
                     var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
                     // Add the cargo to the list of supported cargos.
-                    machine.SupportedCargoTypes.Add(cargo.v1);
-                    controller.supportedCargoTypes.Add(cargo.v1);
-                    InjectCargoName(controller, cargo);
+                    machine.SupportedCargoTypes.Add(cargo);
+                    controller.supportedCargoTypes.Add(cargo);
+                    InjectCargoName(controller, v2);
                     controller.UpdateScreen();
                 }
             }
