@@ -1,4 +1,5 @@
 ﻿using CC.Common;
+using CC.Unity.Validation;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -14,16 +15,14 @@ namespace CC.Unity
         public Sprite? ResourceIcon = null;
         public List<ModelsForVanillaCar> Models = new List<ModelsForVanillaCar>();
 
-        private bool _requireConfirm = false;
-
-        internal bool DisplayWarning => _requireConfirm;
+        internal ValidationResult Result { get; private set; } = new ValidationResult();
         internal bool ShouldMakeBundle => Models.Count > 0 ||
             Icon != null ||
             ResourceIcon != null;
 
         private void OnValidate()
         {
-            _requireConfirm = false;
+            Result = new ValidationResult();
 
             // Make sure this cargo is always in any group.
             foreach (var group in Cargo.CargoGroups)
@@ -60,29 +59,25 @@ namespace CC.Unity
 
         public string? ExportBundle()
         {
-            if (_requireConfirm)
+            if (Result.RequireConfirm)
             {
-                _requireConfirm = false;
+                Result = new ValidationResult();
             }
             else
             {
-                var result = Validation.CargoValidator.ValidateCargo(this);
-                _requireConfirm = result.RequireConfirm;
+                Result = CargoValidator.ValidateCargo(this);
 
-                if (_requireConfirm)
+                if (Result.RequireConfirm)
                 {
-                    if (result.Failed)
-                    {
-                        Debug.LogError("Cargo failed validation!");
-                        _requireConfirm = false;
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
-                            "but it's recommended to fix errors first!");
-                    }
-
-                    result.Log();
+                    Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
+                        "but it's recommended to fix errors first!");
+                    Result.Log();
+                    return null!;
+                }
+                if (Result.Failed)
+                {
+                    Debug.LogError("Cargo failed validation!");
+                    Result.Log();
                     return null!;
                 }
             }

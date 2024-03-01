@@ -113,7 +113,11 @@ namespace CC.Unity.Editor
             serializedObject.ApplyModifiedProperties();
             serializedObject.Update();
 
-            if (_ccc.DisplayWarning)
+            if (_ccc.Result.Failed)
+            {
+                GUI.backgroundColor = EditorHelper.Colours.Cancel;
+            }
+            else if (_ccc.Result.RequireConfirm)
             {
                 GUI.backgroundColor = EditorHelper.Colours.Warning;
             }

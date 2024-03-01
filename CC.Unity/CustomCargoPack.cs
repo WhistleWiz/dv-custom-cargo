@@ -1,4 +1,5 @@
 ﻿using CC.Common;
+using CC.Unity.Validation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -26,10 +27,8 @@ namespace CC.Unity
         [Space]
         [Tooltip("Packs everything into a single bundle instead individual bundles for every cargo")]
         public bool UseSingleBundle = true;
-        
-        private bool _requireConfirm = false;
 
-        internal bool DisplayWarning => _requireConfirm;
+        internal ValidationResult Result { get; private set; } = new ValidationResult();
 
         public string PackId =>  $"{Constants.ModIdPrefix}{PackName.Replace(" ", "")}";
 
@@ -43,38 +42,41 @@ namespace CC.Unity
 
         private void OnValidate()
         {
-            _requireConfirm = false;
+            Result = new ValidationResult();
         }
 
         public string? Export()
         {
-            if (_requireConfirm)
+            if (Result.RequireConfirm)
             {
-                _requireConfirm = false;
+                Result = new ValidationResult();
             }
             else
             {
+                if (Cargos.Count == 0)
+                {
+                    Debug.LogWarning("No cargo in pack!");
+                    Result = new ValidationResult().ScaleToWarning("");
+                    return null!;
+                }
+
                 Debug.Log("Validating all cargo...");
 
                 foreach (var cargo in Cargos)
                 {
-                    var result = Validation.CargoValidator.ValidateCargo(cargo);
-                    _requireConfirm = result.RequireConfirm;
+                    Result = CargoValidator.ValidateCargo(cargo);
 
-                    if (_requireConfirm)
+                    if (Result.RequireConfirm)
                     {
-                        if (result.Failed)
-                        {
-                            Debug.LogError("Cargo failed validation!");
-                            _requireConfirm = false;
-                        }
-                        else
-                        {
-                            Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
-                                "but it's recommended to fix errors first!");
-                        }
-
-                        result.Log();
+                        Debug.LogWarning("Cargo failed validation! You can click export again to force it to export, " +
+                            "but it's recommended to fix errors first!");
+                        Result.Log();
+                        return null!;
+                    }
+                    if (Result.Failed)
+                    {
+                        Debug.LogError("Cargo failed validation!");
+                        Result.Log();
                         return null!;
                     }
                 }

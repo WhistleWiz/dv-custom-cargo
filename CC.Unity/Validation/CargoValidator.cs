@@ -33,6 +33,12 @@ namespace CC.Unity.Validation
                 {
                     result.ScaleToWarning($"{cargo.name} - Cargo group has no destination stations!");
                 }
+
+                if (group.SourceStations.Any(x => group.DestinationStations.Contains(x)) ||
+                    group.DestinationStations.Any(x => group.SourceStations.Contains(x)))
+                {
+                    result.ScaleToWarning($"{cargo.name} - Cargo group has the same station in both sources and destinations!");
+                }
             }
 
             foreach (var model in cargo.Models)

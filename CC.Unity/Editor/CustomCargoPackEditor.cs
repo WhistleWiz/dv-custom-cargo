@@ -19,7 +19,11 @@ namespace CC.Unity.Editor
             base.OnInspectorGUI();
             EditorGUILayout.Space();
 
-            if (_ccp.DisplayWarning)
+            if (_ccp.Result.Failed)
+            {
+                GUI.backgroundColor = EditorHelper.Colours.Cancel;
+            }
+            else if (_ccp.Result.RequireConfirm)
             {
                 GUI.backgroundColor = EditorHelper.Colours.Warning;
             }

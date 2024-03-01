@@ -16,8 +16,10 @@ namespace CC.Unity.Validation
         private List<string> _warnings;
         private List<string> _errors;
 
-        public bool RequireConfirm => _level >= Level.Warning;
-        public bool Failed => _level == Level.Fail;
+        public bool CanExport => _level <= Level.Warning;
+        public bool RequireConfirm => _level == Level.Warning;
+        public bool Failed => _level >= Level.Fail;
+
         public ValidationResult()
         {
             _level = Level.Pass;
