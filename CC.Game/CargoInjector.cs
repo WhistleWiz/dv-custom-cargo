@@ -6,6 +6,7 @@ using DV.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace CC.Game
 {
@@ -74,31 +75,43 @@ namespace CC.Game
 
             // Find the stations where we need to inject new routes.
             var srcStations = new List<StationController>();
+            var srcTracks = new List<string>();
             var destStations = new List<StationController>();
+            var destTracks = new List<string>();
 
             foreach (var source in cc.SourceStations)
             {
-                if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(source, out var station))
+                var yard = GetStationName(source);
+
+                if (!LogicController.Instance.YardIdToStationController.TryGetValue(yard, out var station))
                 {
-                    CCMod.Warning($"Could not find source station '{source}' for cargo '{cc.Identifier}' " +
-                        $"(is vanilla: {Helper.IsVanillaStation(source)})!");
+                    CCMod.Warning($"Could not find source station '{yard}' for cargo '{cc.Identifier}' " +
+                        $"(is vanilla: {Helper.IsVanillaStation(yard)})!");
                     continue;
                 }
 
                 srcStations.Add(station);
+                srcTracks.Add(source);
             }
+
+            srcStations = srcStations.Distinct().ToList();
 
             foreach (var destination in cc.DestinationStations)
             {
-                if (!SingletonBehaviour<LogicController>.Instance.YardIdToStationController.TryGetValue(destination, out var station))
+                var yard = GetStationName(destination);
+
+                if (!LogicController.Instance.YardIdToStationController.TryGetValue(yard, out var station))
                 {
-                    CCMod.Warning($"Could not find destination station '{destination}' for cargo '{cc.Identifier}' " +
-                        $"(is vanilla: {Helper.IsVanillaStation(destination)})!");
+                    CCMod.Warning($"Could not find destination station '{yard}' for cargo '{cc.Identifier}' " +
+                        $"(is vanilla: {Helper.IsVanillaStation(yard)})!");
                     continue;
                 }
 
                 destStations.Add(station);
+                destTracks.Add(destination);
             }
+
+            destStations = destStations.Distinct().ToList();
 
             // If there's no source or destination stations, don't add any routes.
             if (srcStations.Count == 0)
@@ -124,7 +137,7 @@ namespace CC.Game
                         destStations));
                 }
 
-                AddCargoToWarehouse(station, ct);
+                AddCargoToWarehouses(station, srcTracks, ct);
             }
 
             foreach (var station in destStations)
@@ -136,25 +149,45 @@ namespace CC.Game
                         srcStations));
                 }
 
-                AddCargoToWarehouse(station, ct);
+                AddCargoToWarehouses(station, destTracks, ct);
             }
         }
 
-        private static void AddCargoToWarehouse(StationController station, CargoType_v2 cargo)
+        private static string GetStationName(string text)
         {
-            // Grab only one warehouse machine at the station.
-            CCMod.Log($"Adding cargo to station warehouse: '{station.name}'");
-            var machine = station.logicStation.yard.WarehouseMachines.First();
+            // This should turn stations in any format into their names only.
+            // HB       -> HB
+            // OWN      -> OWN
+            // FM-A1L   -> FM
+            var splits = text.Split('-');
+            return string.Join("-", splits.Take(Mathf.Max(1, splits.Length - 1)));
+        }
 
-            if (machine != null)
+        private static void AddCargoToWarehouses(StationController station, List<string> tracksToLoad, CargoType_v2 cargo)
+        {
+            // Add cargo to all machines...
+            foreach (var machine in station.logicStation.yard.WarehouseMachines)
             {
-                // Get the controller for the machine we are using.
-                var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
-                // Add the cargo to the list of supported cargos.
-                machine.SupportedCargoTypes.Add(cargo.v1);
-                controller.supportedCargoTypes.Add(cargo.v1);
-                InjectCargoName(controller, cargo);
-                controller.UpdateScreen();
+                if (machine != null)
+                {
+                    var id = machine.WarehouseTrack.ID.FullDisplayID;
+
+                    // ...if that machine is included in the accepted tracks.
+                    if (!tracksToLoad.Any(x => id.StartsWith(x)))
+                    {
+                        continue;
+                    }
+
+                    CCMod.Log($"Adding cargo to station warehouse at {id}");
+
+                    // Get the controller for the machine we are using.
+                    var controller = WarehouseMachineController.allControllers.First(c => c.warehouseMachine == machine);
+                    // Add the cargo to the list of supported cargos.
+                    machine.SupportedCargoTypes.Add(cargo.v1);
+                    controller.supportedCargoTypes.Add(cargo.v1);
+                    InjectCargoName(controller, cargo);
+                    controller.UpdateScreen();
+                }
             }
         }
 
