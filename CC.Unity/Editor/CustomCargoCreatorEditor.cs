@@ -1,4 +1,5 @@
 ﻿using CC.Common;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -83,6 +84,19 @@ namespace CC.Unity.Editor
                         {
                             _ccc.Cargo.Properties.ReactionProperties = new ReactionProperties();
                             Save();
+                        }
+
+                        if (GUILayout.Button("Add Required Licenses"))
+                        {
+                            var license = CargoHazmatProperties.GetRequiredLicense(_ccc.Cargo.Properties.CargoEffectPools);
+
+                            if (license != 0 && !_ccc.Cargo.Licenses.Contains(license))
+                            {
+                                var temp = _ccc.Cargo.Licenses.ToList();
+                                temp.Add(license);
+                                _ccc.Cargo.Licenses = temp.ToArray();
+                                Save();
+                            }
                         }
                     }
                 }

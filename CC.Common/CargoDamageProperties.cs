@@ -74,6 +74,30 @@ namespace CC.Common
             FireDamageMultiplier = 1f;
             FireResistance = 7.5f;
         }
+
+        public static BaseGameLicense GetRequiredLicense(CargoEffectPools pools)
+        {
+            if (pools.HasFlag(CargoEffectPools.RadioactiveCargo))
+            {
+                return BaseGameLicense.Hazmat3;
+            }
+
+            if (pools.HasFlag(CargoEffectPools.ExplosiveCargo) ||
+                pools.HasFlag(CargoEffectPools.CorrosiveLiquids))
+            {
+                return BaseGameLicense.Hazmat2;
+            }
+
+            if (pools.HasFlag(CargoEffectPools.FlammableLiquids) ||
+                pools.HasFlag(CargoEffectPools.FlammableGases) ||
+                pools.HasFlag(CargoEffectPools.FlammableSolids) ||
+                pools.HasFlag(CargoEffectPools.Oxidizers))
+            {
+                return BaseGameLicense.Hazmat1;
+            }
+
+            return 0;
+        }
     }
 
     [Serializable]

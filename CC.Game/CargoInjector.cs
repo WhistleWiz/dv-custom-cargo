@@ -4,6 +4,7 @@ using DV.Localization;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -273,6 +274,17 @@ namespace CC.Game
             {
                 TrainCarAndCargoDamageProperties.Oxidizers.Add(ct.v1);
             }
+
+            // Reset caches.
+            ClearFlammables();
+        }
+
+        private static void ClearFlammables()
+        {
+            Type t = typeof(TrainCarAndCargoDamageProperties);
+            FieldInfo fi = t.GetField("_flammableCargo");
+            var cargo = (HashSet<CargoType>)fi.GetValue(null);
+            cargo.Clear();
         }
     }
 }
