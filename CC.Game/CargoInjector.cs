@@ -14,7 +14,6 @@ namespace CC.Game
 {
     internal static class CargoInjector
     {
-
         public static void StartInjection()
         {
             // Only run once per load.
@@ -47,7 +46,9 @@ namespace CC.Game
                 }
             }
 
+            // Reset caches.
             RemakeStationToCarTypeCache();
+            ClearFlammables();
         }
 
         private static void RemakeStationToCarTypeCache()
@@ -275,9 +276,6 @@ namespace CC.Game
             {
                 TrainCarAndCargoDamageProperties.Oxidizers.Add(ct.v1);
             }
-
-            // Reset caches.
-            ClearFlammables();
         }
 
         private static void ClearFlammables()
@@ -285,11 +283,7 @@ namespace CC.Game
             Type t = typeof(TrainCarAndCargoDamageProperties);
             FieldInfo fi = t.GetField("_flammableCargo", BindingFlags.Static | BindingFlags.NonPublic);
             var cargo = (HashSet<CargoType>)fi.GetValue(null);
-
-            if (cargo != null)
-            {
-                cargo.Clear();
-            }
+            cargo?.Clear();
         }
     }
 }
