@@ -20,7 +20,6 @@ namespace CC.Game
         public static Dictionary<string, int> Mapping = new Dictionary<string, int>();
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
 
-        private static int s_tempValue = Constants.DefaultCargoValue;
         private static AssetBundle? s_commonBundle;
 
         public static void LoadCargos(UnityModManager.ModEntry mod)
@@ -317,52 +316,6 @@ namespace CC.Game
                     ConnectCCL.ProcessPrefab(prefabs[i]);
                 }
             }
-        }
-
-        public static CargoType_v2 ToV2(this CustomCargo cargo)
-        {
-            var newCargo = ScriptableObject.CreateInstance<CargoType_v2>();
-
-            newCargo.id = cargo.Identifier;
-            newCargo.v1 = (CargoType)(++s_tempValue);
-
-            newCargo.localizationKeyFull = cargo.LocalizationKeyFull;
-            newCargo.localizationKeyShort = cargo.LocalizationKeyShort;
-
-            newCargo.massPerUnit = cargo.MassPerUnit;
-            newCargo.fullDamagePrice = cargo.FullDamagePrice;
-            newCargo.environmentDamagePrice = cargo.EnvironmentDamagePrice;
-
-            newCargo.requiredJobLicenses = cargo.Licenses.Select(x => ((JobLicenses)x).ToV2()).ToArray();
-            newCargo.loadableCarTypes = Array.Empty<CargoType_v2.LoadableInfo>();
-
-            return newCargo;
-        }
-
-        public static List<CargoType> ToCargoTypeGroup(this CustomCargoGroup group, string cargoName)
-        {
-            List<CargoType> types = new List<CargoType>();
-
-            foreach (var item in group.CargosIds)
-            {
-                // Find cargo for the group using the id (name).
-                if (!Globals.G.Types.cargos.TryFind(x => x.id == item, out var cargo))
-                {
-                    CCMod.Error($"Cargo '{item}' is missing (cargo group for '{cargoName}')");
-                    continue;
-                }
-
-                // Don't include it either if there's no wagon to load it.
-                if (cargo.loadableCarTypes.Length == 0)
-                {
-                    CCMod.Error($"Cargo '{item}' cannot be loaded on any car (cargo group for '{cargoName}')");
-                    continue;
-                }
-
-                types.Add(cargo.v1);
-            }
-
-            return types;
         }
 
         public static void ApplyMappings()

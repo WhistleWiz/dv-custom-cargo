@@ -136,7 +136,7 @@ namespace CC.Game
 
                 // Add the cargo group to each source station, then also add
                 // the cargos in it to the station's warehouse machine.
-                var ctgroup = CargoManager.ToCargoTypeGroup(group, cc.Identifier);
+                var ctgroup = Extensions.ToCargoTypeGroup(group, cc.Identifier);
 
                 foreach (var station in srcStations)
                 {
