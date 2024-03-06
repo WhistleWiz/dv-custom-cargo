@@ -14,6 +14,7 @@ namespace CC.Game
 {
     internal static class CargoInjector
     {
+
         public static void StartInjection()
         {
             // Only run once per load.
@@ -23,8 +24,10 @@ namespace CC.Game
                 return;
             }
 
+            StateManager.IsInjected = true;
+
             CCMod.Log("First attempt at job generation started, injecting new routes before it runs...");
-            CCMod.Log("Stations in map: " + string.Join(", ", SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Keys));
+            CCMod.Log("Stations in map: " + string.Join(", ", LogicController.Instance.YardIdToStationController.Keys));
 
             foreach (var (custom, v2) in CargoManager.AddedCargos)
             {
@@ -45,8 +48,6 @@ namespace CC.Game
             }
 
             RemakeStationToCarTypeCache();
-
-            StateManager.IsInjected = true;
         }
 
         private static void RemakeStationToCarTypeCache()
@@ -282,9 +283,13 @@ namespace CC.Game
         private static void ClearFlammables()
         {
             Type t = typeof(TrainCarAndCargoDamageProperties);
-            FieldInfo fi = t.GetField("_flammableCargo");
+            FieldInfo fi = t.GetField("_flammableCargo", BindingFlags.Static | BindingFlags.NonPublic);
             var cargo = (HashSet<CargoType>)fi.GetValue(null);
-            cargo.Clear();
+
+            if (cargo != null)
+            {
+                cargo.Clear();
+            }
         }
     }
 }
