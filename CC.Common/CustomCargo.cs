@@ -34,7 +34,7 @@ namespace CC.Common
         public CarParentType[] VanillaTypesToLoad = new CarParentType[0];
 
         [Tooltip("The licenses required to haul this cargo")]
-        public BaseGameLicense[] Licenses = new BaseGameLicense[0];
+        public string[] Licenses = new string[0];
 
         public CargoHazmatProperties Properties = new CargoHazmatProperties();
 

@@ -49,6 +49,8 @@ namespace CC.Game
             // Reset caches.
             RemakeStationToCarTypeCache();
             ClearFlammables();
+
+            CCMod.Log($"Injection finished!");
         }
 
         private static void RemakeStationToCarTypeCache()
@@ -57,16 +59,16 @@ namespace CC.Game
             Dictionary<StationController, HashSet<TrainCarType_v2>> s2ct = new Dictionary<StationController, HashSet<TrainCarType_v2>>();
 
             var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            var type = SingletonBehaviour<LogicController>.Instance.GetType();
+            var type = LogicController.Instance.GetType();
             var original = type.GetField("stationToSupportedCarTypes", flags);
             var method = type.GetMethod("GetCarTypesThatStationUses", flags);
 
-            foreach (var item in SingletonBehaviour<LogicController>.Instance.YardIdToStationController.Values)
+            foreach (var item in LogicController.Instance.YardIdToStationController.Values)
             {
-                s2ct.Add(item, (HashSet<TrainCarType_v2>)method.Invoke(SingletonBehaviour<LogicController>.Instance, new[] { item }));
+                s2ct.Add(item, (HashSet<TrainCarType_v2>)method.Invoke(LogicController.Instance, new[] { item }));
             }
 
-            original.SetValue(SingletonBehaviour<LogicController>.Instance, s2ct);
+            original.SetValue(LogicController.Instance, s2ct);
         }
 
         private static void InjectRoutes(CustomCargo cc, CargoType_v2 ct)
@@ -280,6 +282,7 @@ namespace CC.Game
 
         private static void ClearFlammables()
         {
+            CCMod.Log("Clearing cached flammables...");
             Type t = typeof(TrainCarAndCargoDamageProperties);
             FieldInfo fi = t.GetField("_flammableCargo", BindingFlags.Static | BindingFlags.NonPublic);
             var cargo = (HashSet<CargoType>)fi.GetValue(null);

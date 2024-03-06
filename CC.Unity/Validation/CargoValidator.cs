@@ -22,22 +22,41 @@ namespace CC.Unity.Validation
                 result.ScaleToWarning($"{cargo.name} - Translation Data Short has empty translations!");
             }
 
+            foreach (var license in c.Licenses)
+            {
+                if (string.IsNullOrEmpty(license))
+                {
+                    result.ScaleToFailure($"{cargo.name} - Licenses array has empty values!");
+                    break;
+                }
+            }
+
             foreach (var group in c.CargoGroups)
             {
+                bool flag = false;
+
                 if (group.SourceStations.Length < 1)
                 {
                     result.ScaleToWarning($"{cargo.name} - Cargo group has no source stations!");
+                    flag = true;
                 }
 
                 if (group.DestinationStations.Length < 1)
                 {
                     result.ScaleToWarning($"{cargo.name} - Cargo group has no destination stations!");
+                    flag = true;
                 }
 
                 if (group.SourceStations.Any(x => group.DestinationStations.Contains(x)) ||
                     group.DestinationStations.Any(x => group.SourceStations.Contains(x)))
                 {
                     result.ScaleToWarning($"{cargo.name} - Cargo group has the same station in both sources and destinations!");
+                    flag = true;
+                }
+
+                if (flag)
+                {
+                    break;
                 }
             }
 

@@ -77,8 +77,23 @@ namespace CC.Game
             newCargo.fullDamagePrice = cargo.FullDamagePrice;
             newCargo.environmentDamagePrice = cargo.EnvironmentDamagePrice;
 
-            newCargo.requiredJobLicenses = cargo.Licenses.Select(x => ((JobLicenses)x).ToV2()).ToArray();
             newCargo.loadableCarTypes = Array.Empty<CargoType_v2.LoadableInfo>();
+
+            var licenses = new List<JobLicenseType_v2>();
+
+            foreach (var item in cargo.Licenses)
+            {
+                if (Globals.G.Types.TryGetJobLicense(item, out var jobLicense))
+                {
+                    licenses.Add(jobLicense);
+                }
+                else
+                {
+                    CCMod.Warning($"Could not find Job License '{item}'");
+                }
+            }
+
+            newCargo.requiredJobLicenses = licenses.ToArray();
 
             return newCargo;
         }

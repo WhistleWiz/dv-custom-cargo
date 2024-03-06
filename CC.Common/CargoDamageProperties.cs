@@ -75,17 +75,17 @@ namespace CC.Common
             FireResistance = 7.5f;
         }
 
-        public static BaseGameLicense GetRequiredLicense(CargoEffectPools pools)
+        public static string? GetRequiredLicense(CargoEffectPools pools)
         {
             if (pools.HasFlag(CargoEffectPools.RadioactiveCargo))
             {
-                return BaseGameLicense.Hazmat3;
+                return "Hazmat3";
             }
 
             if (pools.HasFlag(CargoEffectPools.ExplosiveCargo) ||
                 pools.HasFlag(CargoEffectPools.CorrosiveLiquids))
             {
-                return BaseGameLicense.Hazmat2;
+                return "Hazmat2";
             }
 
             if (pools.HasFlag(CargoEffectPools.FlammableLiquids) ||
@@ -93,10 +93,10 @@ namespace CC.Common
                 pools.HasFlag(CargoEffectPools.FlammableSolids) ||
                 pools.HasFlag(CargoEffectPools.Oxidizers))
             {
-                return BaseGameLicense.Hazmat1;
+                return "Hazmat1";
             }
 
-            return 0;
+            return null;
         }
     }
 

@@ -90,10 +90,10 @@ namespace CC.Unity.Editor
                         {
                             var license = CargoHazmatProperties.GetRequiredLicense(_ccc.Cargo.Properties.CargoEffectPools);
 
-                            if (license != 0 && !_ccc.Cargo.Licenses.Contains(license))
+                            if (!string.IsNullOrEmpty(license) && !_ccc.Cargo.Licenses.Contains(license))
                             {
                                 var temp = _ccc.Cargo.Licenses.ToList();
-                                temp.Add(license);
+                                temp.Add(license!);
                                 _ccc.Cargo.Licenses = temp.ToArray();
                                 Save();
                             }
