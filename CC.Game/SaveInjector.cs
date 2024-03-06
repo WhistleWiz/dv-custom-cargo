@@ -34,11 +34,6 @@ namespace CC.Game
 
                     CargoManager.Mapping = dictionary;
                     CCMod.Log("Mapping cache sucessfully loaded.");
-
-                    foreach (var item in dictionary)
-                    {
-                        CCMod.Log($"{item.Key} - {item.Value}");
-                    }
                 }
                 else
                 {
