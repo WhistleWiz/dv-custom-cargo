@@ -44,6 +44,11 @@ namespace CC.Common
 
             CargoEffectPools = cep;
 
+            if (CargoEffectPools.HasFlag(CargoEffectPools.Oils))
+            {
+                CargoEffectPools |= CargoEffectPools.FlammableLiquids;
+            }
+
             // If leak curve is none, force it to be liquid or gas if the cargo
             // is in certain pools.
             if (LeakCurve == CargoLeakCurve.None)
