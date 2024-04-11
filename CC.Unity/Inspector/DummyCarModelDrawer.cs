@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CC.Unity.Editor
+namespace CC.Unity.Inspector
 {
     internal class DummyCarModelDrawer : MonoBehaviour
     {
@@ -47,7 +47,7 @@ namespace CC.Unity.Editor
                     toDraw = VolumeCollection.Hopper;
                     break;
                 case CarParentType.Gondola:
-                    toDraw= VolumeCollection.Gondola;
+                    toDraw = VolumeCollection.Gondola;
                     break;
                 case CarParentType.Passenger:
                     toDraw = VolumeCollection.Passenger;

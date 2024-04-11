@@ -1,4 +1,5 @@
 ﻿using CC.Common;
+using CC.Common.Conditions;
 using DV;
 using DV.ThingTypes;
 using DVLangHelper.Data;
@@ -19,6 +20,13 @@ namespace CC.Game
         public static List<(CustomCargo Custom, CargoType_v2 V2)> AddedCargos = new List<(CustomCargo, CargoType_v2)>();
 
         private static AssetBundle? s_commonBundle;
+        private static JsonSerializerSettings s_jsonSettings = new JsonSerializerSettings()
+        {
+            Converters = new[]
+            {
+                new ConditionConverter()
+            }
+        };
 
         public static void LoadCargos(UnityModManager.ModEntry mod)
         {
@@ -31,14 +39,12 @@ namespace CC.Game
 
                 try
                 {
-                    using (StreamReader reader = File.OpenText(jsonPath))
-                    {
-                        c = JsonConvert.DeserializeObject<CustomCargo>(reader.ReadToEnd());
-                    }
+                    using StreamReader reader = File.OpenText(jsonPath);
+                    c = JsonConvert.DeserializeObject<CustomCargo>(reader.ReadToEnd(), s_jsonSettings);
                 }
                 catch (Exception ex)
                 {
-                    CCMod.Error($"Error loading file {jsonPath}:\n{ex.Message}");
+                    CCMod.Error($"Error loading file {jsonPath}:\n{ex}");
                     continue;
                 }
 

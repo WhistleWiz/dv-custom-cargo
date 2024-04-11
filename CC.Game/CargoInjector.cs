@@ -143,7 +143,8 @@ namespace CC.Game
 
                 foreach (var station in srcStations)
                 {
-                    station.proceduralJobsRuleset.outputCargoGroups.Add(new CargoGroup(ctgroup, destStations));
+                    station.proceduralJobsRuleset.outputCargoGroups.Add(
+                        new CCCargoGroup(ctgroup, destStations, group.SpawnConditions, group.ConditionMode));
 
                     foreach (var v1 in ctgroup)
                     {
@@ -153,7 +154,8 @@ namespace CC.Game
 
                 foreach (var station in destStations)
                 {
-                    station.proceduralJobsRuleset.inputCargoGroups.Add(new CargoGroup(ctgroup, srcStations));
+                    station.proceduralJobsRuleset.inputCargoGroups.Add(
+                        new CCCargoGroup(ctgroup, srcStations, group.SpawnConditions, group.ConditionMode));
 
                     foreach (var v1 in ctgroup)
                     {

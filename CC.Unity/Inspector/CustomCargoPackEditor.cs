@@ -1,10 +1,10 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace CC.Unity.Editor
+namespace CC.Unity.Inspector
 {
     [CustomEditor(typeof(CustomCargoPack))]
-    internal class CustomCargoPackEditor : UnityEditor.Editor
+    internal class CustomCargoPackEditor : Editor
     {
         private static GUIContent s_exportContent = new GUIContent("Export",
             "Exports your cargo pack to a zip file you can drag and drop into UMM\n" +
