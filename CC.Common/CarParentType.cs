@@ -1,4 +1,6 @@
-﻿namespace CC.Common
+﻿using UnityEngine;
+
+namespace CC.Common
 {
     public enum CarParentType
     {
@@ -6,6 +8,7 @@
         Flatbed         = 200,
         FlatbedStakes   = 201,
         FlatbedMilitary = 202,
+        UtilityFlatbed  = 220,
         Autorack        = 250,
         TankOil         = 301,
         TankGas         = 300,
@@ -16,8 +19,11 @@
         BoxcarMilitary  = 404,
         Refrigerator    = 450,
         Hopper          = 500,
+        CoveredHopper   = 510,
         Gondola         = 550,
         Passenger       = 600,
-        NuclearFlask    = 800
+        NuclearFlask    = 800,
+        [InspectorName("DM1U-150 (Utility Rail Vehicle)")]
+        DM1U150         = 35,
     }
 }

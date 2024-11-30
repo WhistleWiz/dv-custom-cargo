@@ -1,10 +1,10 @@
 ﻿using CC.Common;
 using UnityEditor;
 
-namespace CC.Unity.Editor
+namespace CC.Unity.Inspector
 {
     [CustomEditor(typeof(UseCargoPrefab))]
-    internal class UseCargoPrefabEditor : UnityEditor.Editor
+    internal class UseCargoPrefabEditor : Editor
     {
         private UseCargoPrefab _ucp = null!;
         private SerializedProperty _prefabIndex = null!;

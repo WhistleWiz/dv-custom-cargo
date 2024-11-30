@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityModManagerNet;
 
 namespace CC.Game
 {
@@ -9,6 +10,7 @@ namespace CC.Game
     {
         private static MethodInfo? s_method;
         private static bool s_loaded = false;
+        private static UnityModManager.ModEntry? s_entry;
 
         public static bool LoadedCCL => s_loaded;
 
@@ -50,6 +52,30 @@ namespace CC.Game
                 CCMod.Error("CCL call failed! Setting CCL load to false.");
                 s_loaded = false;
                 return;
+            }
+
+            if (s_entry == null)
+            {
+                s_entry = UnityModManager.FindMod("DVCustomCarLoader");
+
+                if (s_entry == null || s_entry.ErrorOnLoading)
+                {
+                    CCMod.Error("CCL failed loading, but exists! Setting CCL load to false.");
+                    s_loaded = false;
+                    return;
+                }
+
+                if (!s_entry.Active)
+                {
+                    CCMod.Log("CCL inactive, skipping processing.");
+                    s_loaded = false;
+                    return;
+                }
+
+                if (!s_entry.Loaded)
+                {
+                    s_entry.Load();
+                }
             }
 
             s_method?.Invoke(null, new object[] { prefab });

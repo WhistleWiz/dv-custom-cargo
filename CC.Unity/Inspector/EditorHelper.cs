@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CC.Unity.Editor
+namespace CC.Unity.Inspector
 {
     internal class EditorHelper
     {

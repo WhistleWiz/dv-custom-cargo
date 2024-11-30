@@ -1,4 +1,5 @@
 ﻿using CC.Common;
+using CC.Common.Components;
 using DV;
 using DV.ThingTypes;
 using DVLangHelper.Data;
@@ -312,6 +313,16 @@ namespace CC.Game
                 {
                     // If the prefab won't be replaced, do CCL processing.
                     ConnectCCL.ProcessPrefab(prefabs[i]);
+                }
+
+                foreach (var item in prefabs[i].GetComponentsInChildren<UseDefaultMaterial>())
+                {
+                    item.Renderer.sharedMaterial = CCMod.MaterialCache[item.MaterialName];
+                }
+
+                foreach (var item in prefabs[i].GetComponentsInChildren<UseDefaultMesh>())
+                {
+                    item.MeshFilter.sharedMesh = CCMod.MeshCache[item.MeshName];
                 }
             }
         }

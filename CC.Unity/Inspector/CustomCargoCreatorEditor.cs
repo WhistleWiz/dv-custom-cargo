@@ -3,10 +3,10 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace CC.Unity.Editor
+namespace CC.Unity.Inspector
 {
     [CustomEditor(typeof(CustomCargoCreator))]
-    internal class CustomCargoCreatorEditor : UnityEditor.Editor
+    internal class CustomCargoCreatorEditor : Editor
     {
 
         private static GUIContent s_createAddContent = new GUIContent("Create model set",

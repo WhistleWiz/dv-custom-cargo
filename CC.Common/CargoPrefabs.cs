@@ -23,6 +23,7 @@ namespace CC.Common
             new CargoPrefab("Container Traeg",                          909, 0, 0),
             new CargoPrefab("Container White",                          900, 0, 2),
             new CargoPrefab("Container White AC",                       900, 0, 3),
+            new CargoPrefab("Scraped Container",                        153, 0, 0),
 
             new CargoPrefab("Container Acetylene (Medium x2)",          281, 0, 0),
             new CargoPrefab("ISO Tank Yellow Asphyxiating (x2)",        284, 0, 0),
