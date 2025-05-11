@@ -2,6 +2,11 @@
   "Releases": [
     {
       "Id": "DVCustomCargo",
+      "Version": "2.1.0",
+      "DownloadUrl": "https://github.com/WhistleWiz/dv-custom-cargo/releases/download/v2.1.0/DVCustomCargo.zip"
+    },
+    {
+      "Id": "DVCustomCargo",
       "Version": "2.0.0",
       "DownloadUrl": "https://github.com/WhistleWiz/dv-custom-cargo/releases/download/v2.0.0/DVCustomCargo.zip"
     },
