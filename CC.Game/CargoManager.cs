@@ -69,6 +69,7 @@ namespace CC.Game
             {
                 CCMod.Log($"Loaded {newCargos.Count} cargos from {mod.Path}");
                 CCMod.Log(string.Join(", ", newCargos.Select(x => x.id)));
+                Globals.G.Types.RecalculateCaches();
             }
         }
 
@@ -211,9 +212,11 @@ namespace CC.Game
                 data = File.ReadAllBytes(path);
                 var tex = new Texture2D(2, 2);
                 tex.LoadImage(data);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                tex.filterMode = FilterMode.Bilinear;
 
                 // Create a sprite that covers the whole texture.
-                icon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
+                icon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100, 1, SpriteMeshType.Tight);
             }
 
             // Repeat for the resource icon.
@@ -224,8 +227,10 @@ namespace CC.Game
                 data = File.ReadAllBytes(path);
                 var tex = new Texture2D(2, 2);
                 tex.LoadImage(data);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                tex.filterMode = FilterMode.Bilinear;
 
-                resourceIcon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100);
+                resourceIcon = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100, 1, SpriteMeshType.Tight);
             }
         }
 
@@ -282,15 +287,8 @@ namespace CC.Game
                 {
                     var first = models.FirstOrDefault(x => x.CarType == item);
 
-                    // No models for this car type.
-                    if (first == default)
-                    {
-                        prefabs = new GameObject[0];
-                    }
-                    else
-                    {
-                        prefabs = first.Prefabs;
-                    }
+                    // Check if there are models for this car type.
+                    prefabs = first == default ? new GameObject[0] : first.Prefabs;
                 }
 
                 ProcessOriginalPrefabs(prefabs);
@@ -304,6 +302,8 @@ namespace CC.Game
         {
             for (int i = 0; i < prefabs.Length; i++)
             {
+                FixLayers(prefabs[i]);
+
                 // If one of the prefabs is actually to be replaced...
                 if (prefabs[i].TryGetComponent<UseCargoPrefab>(out var comp))
                 {
@@ -317,12 +317,48 @@ namespace CC.Game
 
                 foreach (var item in prefabs[i].GetComponentsInChildren<UseDefaultMaterial>())
                 {
-                    item.Renderer.sharedMaterial = CCMod.MaterialCache[item.MaterialName];
+                    if (CCMod.MaterialCache.TryGetValue(item.MaterialName, out var mat))
+                    {
+                        item.Renderer.sharedMaterial = mat;
+                        UnityEngine.Object.Destroy(item);
+                    }
+                    else
+                    {
+                        CCMod.Error($"Could not find material {item.MaterialName} in cache.");
+                    }
                 }
 
                 foreach (var item in prefabs[i].GetComponentsInChildren<UseDefaultMesh>())
                 {
-                    item.MeshFilter.sharedMesh = CCMod.MeshCache[item.MeshName];
+                    if (CCMod.MeshCache.TryGetValue(item.MeshName, out var mesh))
+                    {
+                        item.MeshFilter.sharedMesh = mesh;
+                        UnityEngine.Object.Destroy(item);
+                    }
+                    else
+                    {
+                        CCMod.Error($"Could not find mesh {item.MeshName} in cache.");
+                    }
+                }
+            }
+        }
+
+        private static void FixLayers(GameObject prefab)
+        {
+            SetLayersOfChildren(prefab.transform, Constants.CollidersCollision, Constants.LayerTrainBigCollider);
+            SetLayersOfChildren(prefab.transform, Constants.CollidersWalkable, Constants.LayerWalkable);
+            SetLayersOfChildren(prefab.transform, Constants.CollidersItems, Constants.LayerItems);
+            SetLayersOfChildren(prefab.transform, Constants.CollidersCameraDampening, Constants.LayerCameraDampening);
+
+            static void SetLayersOfChildren(Transform root, string path, int layer)
+            {
+                var t = root.Find(path);
+
+                if (t == null) return;
+
+                foreach (var item in t.GetComponentsInChildren<Transform>())
+                {
+                    item.gameObject.layer = layer;
                 }
             }
         }
